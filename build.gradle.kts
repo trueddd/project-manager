@@ -46,7 +46,7 @@ tasks.register<Jar>("fatJar") {
     manifest {
         attributes(
                 mapOf(
-                        "Main-Class" to application.mainClassName,
+                        "Main-Class" to "com.example.MainKt",
                         "Class-Path" to configurations.compile
                 )
         )
