@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -port=$PORT -jar build/libs/project-manager-*.jar
+web: java $JAVA_OPTS -Dserver.port=$PORT -jar build/libs/project-manager-*.jar
