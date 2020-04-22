@@ -46,11 +46,11 @@ tasks.register<Jar>("fatJar") {
     manifest {
         attributes(
                 mapOf(
-                        "Main-Class" to "com.example.MainKt",
+                        "Main-Class" to application.mainClassName,
                         "Class-Path" to configurations.compile
                 )
         )
     }
-    archiveBaseName.set("${project.name}-all")
+    archiveBaseName.set(project.name)
     from(Callable { configurations["runtimeClasspath"].map { if (it.isDirectory) it else zipTree(it) } })
 }
