@@ -13,7 +13,6 @@ application {
 repositories {
     mavenLocal()
     jcenter()
-    maven { url = uri("https://kotlin.bintray.com/ktor") }
 }
 
 dependencies {
@@ -51,6 +50,6 @@ tasks.register<Jar>("fatJar") {
                 )
         )
     }
-    archiveBaseName.set(project.name)
+    archiveBaseName.set("${project.name}-all")
     from(Callable { configurations["runtimeClasspath"].map { if (it.isDirectory) it else zipTree(it) } })
 }
