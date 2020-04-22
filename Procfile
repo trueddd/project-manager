@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -Dport=$PORT -cp build/libs/project-manager-*.jar com.example.ApplicationKt
+web: java $JAVA_OPTS -Dport=$PORT -jar build/libs/project-manager-*.jar
