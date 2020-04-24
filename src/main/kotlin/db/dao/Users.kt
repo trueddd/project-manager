@@ -1,4 +1,4 @@
-package db
+package db.dao
 
 import org.jetbrains.exposed.sql.Table
 

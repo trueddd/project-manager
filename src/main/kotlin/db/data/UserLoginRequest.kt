@@ -1,4 +1,4 @@
-package db
+package db.data
 
 data class UserLoginRequest(
     val name: String,
