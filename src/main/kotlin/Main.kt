@@ -21,6 +21,7 @@ import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.slf4j.event.Level
 import route.loginRoutes
+import route.teamRoutes
 import route.userRoutes
 import utils.AppEnvironment
 
@@ -68,5 +69,6 @@ fun Application.module() {
 
         userRoutes()
         loginRoutes()
+        teamRoutes()
     }
 }

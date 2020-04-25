@@ -10,7 +10,10 @@ class LoginServiceImpl(private val usersRepository: UsersRepository) : LoginServ
     override fun loginUser(userLogin: UserLoginRequest): LoginResponse? {
         val userInDb = usersRepository.findUserByNameAndPass(userLogin.name, userLogin.pass)
         if (userInDb == null) {
-            val newUser = usersRepository.addNewUser(userLogin.name, userLogin.pass) ?: return null
+            val newUser = usersRepository.addNewUser(userLogin.name, userLogin.pass) ?: run {
+                println("newuser is null")
+                return null
+            }
             return LoginResponse(newUser, JwtConfig.makeToken(newUser.id))
         } else {
             return LoginResponse(userInDb, JwtConfig.makeToken(userInDb.id))

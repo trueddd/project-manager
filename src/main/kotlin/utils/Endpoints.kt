@@ -5,5 +5,9 @@ object Endpoints {
         const val Base = "/login"
         const val Refresh = "/login/refresh"
     }
-    const val Users = "/users"
+    object Users {
+        const val Base = "/users"
+        const val Team = "/users/team"
+    }
+    const val Teams = "/teams"
 }

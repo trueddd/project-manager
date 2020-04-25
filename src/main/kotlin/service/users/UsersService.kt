@@ -1,10 +1,12 @@
 package service.users
 
-import db.data.UserOutput
+import db.data.User
 
 interface UsersService {
 
-    fun getAllUsers(): List<UserOutput>
+    fun getAllUsers(): List<User>
 
-    fun getUserById(id: Int): UserOutput?
+    fun getUserById(id: Int): User?
+
+    fun changeTeam(userId: Int, teamId: Int): User?
 }

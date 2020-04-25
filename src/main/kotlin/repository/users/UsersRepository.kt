@@ -1,14 +1,16 @@
 package repository.users
 
-import db.data.UserOutput
+import db.data.User
 
 interface UsersRepository {
 
-    fun getUsers(): List<UserOutput>
+    fun getUsers(): List<User>
 
-    fun addNewUser(name: String, pass: String): UserOutput?
+    fun addNewUser(name: String, pass: String): User?
 
-    fun findUserByNameAndPass(name: String, pass: String): UserOutput?
+    fun findUserByNameAndPass(name: String, pass: String): User?
 
-    fun findUserById(id: Int): UserOutput?
+    fun findUserById(id: Int): User?
+
+    fun changeTeam(userId: Int, teamId: Int): User?
 }

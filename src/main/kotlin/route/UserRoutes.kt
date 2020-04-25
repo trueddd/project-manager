@@ -14,7 +14,7 @@ fun Routing.userRoutes() {
     val usersService by inject<UsersService>()
 
     authenticate {
-        get(Endpoints.Users) {
+        get(Endpoints.Users.Base) {
             val users = usersService.getAllUsers()
             call.respond(users)
         }
