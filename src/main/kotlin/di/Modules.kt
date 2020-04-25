@@ -1,6 +1,7 @@
 package di
 
 import db.provideDatabase
+import org.koin.dsl.binds
 import org.koin.dsl.module
 import repository.teams.TeamsRepository
 import repository.teams.TeamsRepositoryImpl
@@ -20,7 +21,7 @@ val dbModule = module {
 
 val repositoryModule = module {
 
-    single<UsersRepository> { UsersRepositoryImpl(database = get()) }
+    single { UsersRepositoryImpl(database = get()) } binds arrayOf(UsersRepository::class)
 
     single<TeamsRepository> { TeamsRepositoryImpl(database = get()) }
 }
@@ -31,5 +32,5 @@ val serviceModule = module {
 
     single<LoginService> { LoginServiceImpl(usersRepository = get()) }
 
-    single<TeamsService> { TeamsServiceImpl(teamsRepository = get()) }
+    single<TeamsService> { TeamsServiceImpl(teamsRepository = get(), usersRepository = get()) }
 }

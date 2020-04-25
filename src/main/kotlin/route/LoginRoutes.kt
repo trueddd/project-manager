@@ -30,7 +30,7 @@ fun Routing.loginRoutes() {
 
     post(Endpoints.Login.Refresh) {
         val userData = call.receiveSafe<UserLoginRequest>() ?: run {
-            call.respond(HttpStatusCode.Unauthorized)
+            call.respond(HttpStatusCode.BadRequest)
             return@post
         }
         val refreshResponse = loginService.getNewToken(userData)

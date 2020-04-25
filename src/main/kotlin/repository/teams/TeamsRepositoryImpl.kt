@@ -20,13 +20,20 @@ class TeamsRepositoryImpl(database: Database) : BaseRepository(database), TeamsR
         }
     }
 
-    override fun addNewTeam(name: String, country: String?, city: String?): Team? {
+    override fun addNewTeam(ownerId: Int, name: String, country: String?, city: String?): Team? {
         return query {
-            Teams.insert {
+            val newTeam = Teams.insert {
                 it[Teams.name] = name
                 it[Teams.country] = country
                 it[Teams.city] = city
-            }.resultedValues?.firstOrNull()?.toTeam()
+            }.resultedValues?.firstOrNull()?.toTeam() ?: return@query null
+            val updated = Users.update({ Users.id eq ownerId }) {
+                it[teamId] = newTeam.id
+            }
+            return@query if (updated > 0) newTeam else {
+                rollback()
+                null
+            }
         }
     }
 
