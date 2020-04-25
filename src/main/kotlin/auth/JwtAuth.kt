@@ -11,7 +11,7 @@ fun Authentication.Configuration.setupJwtAuth(usersService: UsersService) {
         realm = AppEnvironment.JWT.realm()
         validate { credentials ->
             val id = credentials.payload.getClaim("id").asInt() ?: return@validate null
-            return@validate usersService.getUserById(id)
+            return@validate usersService.getUserById(id).getSuccess()
         }
     }
 }

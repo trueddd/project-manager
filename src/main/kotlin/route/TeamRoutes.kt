@@ -10,6 +10,7 @@ import io.ktor.routing.*
 import org.koin.ktor.ext.inject
 import service.teams.TeamsService
 import utils.Endpoints
+import utils.ServiceResult
 import utils.receiveSafe
 
 fun Routing.teamRoutes() {
@@ -19,8 +20,10 @@ fun Routing.teamRoutes() {
     authenticate {
 
         get(Endpoints.Teams) {
-            val teams = teamsService.getAllTeams()
-            call.respond(HttpStatusCode.OK, teams)
+            when (val teams = teamsService.getAllTeams()) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, teams.data)
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError)
+            }
         }
 
         post(Endpoints.Teams) {
@@ -28,11 +31,9 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            val newTeam = teamsService.registerTeam(requested.name, requested.country, requested.city)
-            if (newTeam != null) {
-                call.respond(HttpStatusCode.Created, newTeam)
-            } else {
-                call.respond(HttpStatusCode.InternalServerError)
+            when (val newTeam = teamsService.registerTeam(requested.name, requested.country, requested.city)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.Created, newTeam.data)
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, newTeam.e.message.orEmpty())
             }
         }
 
@@ -41,11 +42,9 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            val updated = teamsService.modifyTeam(toUpdate.id, toUpdate.name, toUpdate.country, toUpdate.city)
-            if (updated != null) {
-                call.respond(HttpStatusCode.OK, updated)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            when (val updated = teamsService.modifyTeam(toUpdate.id, toUpdate.name, toUpdate.country, toUpdate.city)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, updated.data)
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, updated.e.message.orEmpty())
             }
         }
 
@@ -54,11 +53,9 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.BadRequest, "Specify team you want to delete by sending its id as query-parameter")
                 return@delete
             }
-            val deleted = teamsService.deleteTeam(toDelete)
-            if (deleted) {
-                call.respond(HttpStatusCode.OK)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            when (teamsService.deleteTeam(toDelete)) {
+                true -> call.respond(HttpStatusCode.OK)
+                false -> call.respond(HttpStatusCode.NotFound)
             }
         }
     }
