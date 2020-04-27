@@ -1,5 +1,6 @@
 package db.data
 
+import db.data.teams.Team
 import io.ktor.auth.Principal
 
 data class User(

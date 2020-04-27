@@ -45,7 +45,7 @@ fun Routing.userRoutes() {
         }
 
         delete(Endpoints.Users.Base) {
-            val currentUser = call.user ?: kotlin.run {
+            val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
             }

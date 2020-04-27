@@ -1,5 +1,6 @@
 package route
 
+import db.data.UserCreateBody
 import db.data.UserLoginRequest
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -15,12 +16,12 @@ fun Routing.loginRoutes() {
 
     val loginService by inject<LoginService>()
 
-    post(Endpoints.Login.Base) {
-        val userLogin = call.receiveSafe<UserLoginRequest>() ?: run {
+    post(Endpoints.Login.Register) {
+        val userLogin = call.receiveSafe<UserCreateBody>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val loginResponse = loginService.loginUser(userLogin)
+        val loginResponse = loginService.register(userLogin)
         if (loginResponse != null) {
             call.respond(HttpStatusCode.OK, loginResponse)
         } else {
@@ -33,7 +34,7 @@ fun Routing.loginRoutes() {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val refreshResponse = loginService.getNewToken(userData)
+        val refreshResponse = loginService.login(userData)
         if (refreshResponse != null) {
             call.respond(HttpStatusCode.OK, refreshResponse)
         } else {

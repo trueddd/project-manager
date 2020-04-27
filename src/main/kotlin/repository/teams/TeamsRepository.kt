@@ -1,6 +1,6 @@
 package repository.teams
 
-import db.data.Team
+import db.data.teams.Team
 
 interface TeamsRepository {
 

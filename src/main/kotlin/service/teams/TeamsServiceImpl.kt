@@ -1,6 +1,6 @@
 package service.teams
 
-import db.data.Team
+import db.data.teams.Team
 import db.data.User
 import repository.teams.TeamsRepository
 import repository.users.UsersRepository
@@ -16,6 +16,10 @@ class TeamsServiceImpl(
 
     override fun getAllTeams(): ServiceResult<List<Team>> {
         return teamsRepository.getAllTeams().success()
+    }
+
+    override fun getTeamMembers(teamId: Int): ServiceResult<List<User>> {
+        return usersRepository.findUsersByTeamId(teamId).success()
     }
 
     override fun isUserFromTeam(userId: Int, teamId: Int): Boolean {

@@ -1,4 +1,4 @@
-package db.data
+package db.data.teams
 
 data class TeamCreateRequestBody(
     val name: String,
