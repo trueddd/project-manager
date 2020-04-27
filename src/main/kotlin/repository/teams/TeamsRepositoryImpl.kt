@@ -2,7 +2,7 @@ package repository.teams
 
 import db.dao.Teams
 import db.dao.Users
-import db.data.Team
+import db.data.teams.Team
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
 

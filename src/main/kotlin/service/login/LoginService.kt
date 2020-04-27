@@ -1,11 +1,12 @@
 package service.login
 
 import db.data.LoginResponse
+import db.data.UserCreateBody
 import db.data.UserLoginRequest
 
 interface LoginService {
 
-    fun loginUser(userLogin: UserLoginRequest): LoginResponse?
+    fun register(user: UserCreateBody): LoginResponse?
 
-    fun getNewToken(userData: UserLoginRequest): LoginResponse?
+    fun login(userData: UserLoginRequest): LoginResponse?
 }

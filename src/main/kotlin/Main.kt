@@ -7,11 +7,11 @@ import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.path
-import io.ktor.response.respondText
+import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
@@ -21,6 +21,7 @@ import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.slf4j.event.Level
 import route.loginRoutes
+import route.projectRoutes
 import route.teamRoutes
 import route.userRoutes
 import utils.AppEnvironment
@@ -64,11 +65,12 @@ fun Application.module() {
     routing {
 
         get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
+            call.respond(HttpStatusCode.OK, "Server is up")
         }
 
         userRoutes()
         loginRoutes()
         teamRoutes()
+        projectRoutes()
     }
 }

@@ -1,8 +1,8 @@
-package db.data
+package db.data.teams
 
-data class TeamUpdateBody(
+data class Team(
     val id: Int,
-    val name: String?,
+    val name: String,
     val country: String?,
     val city: String?
 )

@@ -2,15 +2,16 @@ package service.login
 
 import auth.JwtConfig
 import db.data.LoginResponse
+import db.data.UserCreateBody
 import db.data.UserLoginRequest
 import repository.users.UsersRepository
 
 class LoginServiceImpl(private val usersRepository: UsersRepository) : LoginService {
 
-    override fun loginUser(userLogin: UserLoginRequest): LoginResponse? {
-        val userInDb = usersRepository.findUserByNameAndPass(userLogin.name, userLogin.pass)
+    override fun register(user: UserCreateBody): LoginResponse? {
+        val userInDb = usersRepository.findUserByNameAndPass(user.name, user.pass)
         if (userInDb == null) {
-            val newUser = usersRepository.addNewUser(userLogin.name, userLogin.pass) ?: run {
+            val newUser = usersRepository.addNewUser(user) ?: run {
                 println("newuser is null")
                 return null
             }
@@ -20,7 +21,7 @@ class LoginServiceImpl(private val usersRepository: UsersRepository) : LoginServ
         }
     }
 
-    override fun getNewToken(userData: UserLoginRequest): LoginResponse? {
+    override fun login(userData: UserLoginRequest): LoginResponse? {
         val user = usersRepository.findUserByNameAndPass(userData.name, userData.pass) ?: return null
         val token = JwtConfig.makeToken(user.id)
         return LoginResponse(user, token)

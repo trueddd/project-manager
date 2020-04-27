@@ -3,7 +3,8 @@ package repository.users
 import db.dao.Teams
 import db.data.User
 import db.dao.Users
-import db.data.Team
+import db.data.UserCreateBody
+import db.data.teams.Team
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
 import java.math.BigInteger
@@ -15,14 +16,16 @@ class UsersRepositoryImpl(database: Database) : BaseRepository(database), UsersR
         return query { (Users leftJoin Teams).selectAll().map { it.toUser() } }
     }
 
-    override fun addNewUser(name: String, pass: String): User? {
+    override fun addNewUser(user: UserCreateBody): User? {
         return query {
             Users.insert {
-                it[Users.name] = name
-                it[passHash] = pass.hash()
+                it[name] = user.name
+                it[passHash] = user.pass.hash()
+                it[firstName] = user.firstName
+                it[lastName] = user.lastName
             }
             (Users leftJoin Teams)
-                .select { Users.name eq name }.singleOrNull()?.toUser()
+                .select { Users.name eq user.name }.singleOrNull()?.toUser()
         }
     }
 
@@ -45,6 +48,10 @@ class UsersRepositoryImpl(database: Database) : BaseRepository(database), UsersR
             (Users leftJoin Teams)
                 .select { Users.id eq id }.singleOrNull()?.toUser()
         }
+    }
+
+    override fun findUsersByTeamId(teamId: Int): List<User> = query {
+        Users.select { Users.teamId eq teamId }.map { it.toUser(withTeam = false) }
     }
 
     override fun changeTeam(userId: Int, teamId: Int): User? {
@@ -92,6 +99,11 @@ class UsersRepositoryImpl(database: Database) : BaseRepository(database), UsersR
         return query {
             Users.deleteWhere { Users.id eq id } > 0
         }
+    }
+
+    override fun isUserFromTeam(userId: Int, teamId: Int): Boolean {
+        val user = findUserById(userId) ?: return false
+        return user.team?.id == teamId
     }
 
     private fun ResultRow.toUser(withTeam: Boolean = true): User {

@@ -1,6 +1,7 @@
 package repository.users
 
 import db.data.User
+import db.data.UserCreateBody
 
 interface UsersRepository {
 
@@ -12,7 +13,9 @@ interface UsersRepository {
 
     fun findUserByName(name: String): User?
 
-    fun addNewUser(name: String, pass: String): User?
+    fun findUsersByTeamId(teamId: Int): List<User>
+
+    fun addNewUser(user: UserCreateBody): User?
 
     fun changeTeam(userId: Int, teamId: Int): User?
 
@@ -21,4 +24,6 @@ interface UsersRepository {
     fun dropTeam(userId: Int): User?
 
     fun deleteUser(id: Int): Boolean
+
+    fun isUserFromTeam(userId: Int, teamId: Int): Boolean
 }

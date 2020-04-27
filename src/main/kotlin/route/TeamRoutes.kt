@@ -1,7 +1,7 @@
 package route
 
-import db.data.TeamCreateRequestBody
-import db.data.TeamUpdateBody
+import db.data.teams.TeamCreateRequestBody
+import db.data.teams.TeamUpdateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -20,14 +20,33 @@ fun Routing.teamRoutes() {
 
     authenticate {
 
-        get(Endpoints.Teams) {
+        get(Endpoints.Teams.Base) {
             when (val teams = teamsService.getAllTeams()) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, teams.data)
                 is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError)
             }
         }
 
-        post(Endpoints.Teams) {
+        get(Endpoints.Teams.Members) {
+            val currentUser = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+            val teamId = call.parameters["team_id"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No team id provided")
+                return@get
+            }
+            if (!teamsService.isUserFromTeam(currentUser.id, teamId)) {
+                call.respond(HttpStatusCode.Unauthorized, "You are not allowed to get info of requested team")
+                return@get
+            }
+            when (val users = teamsService.getTeamMembers(teamId)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, users.data)
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, users.e.message.orEmpty())
+            }
+        }
+
+        post(Endpoints.Teams.Base) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
@@ -42,7 +61,7 @@ fun Routing.teamRoutes() {
             }
         }
 
-        put(Endpoints.Teams) {
+        put(Endpoints.Teams.Base) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
@@ -61,7 +80,7 @@ fun Routing.teamRoutes() {
             }
         }
 
-        delete(Endpoints.Teams) {
+        delete(Endpoints.Teams.Base) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
