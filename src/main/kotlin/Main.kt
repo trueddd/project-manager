@@ -20,10 +20,7 @@ import io.ktor.util.KtorExperimentalAPI
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.slf4j.event.Level
-import route.loginRoutes
-import route.projectRoutes
-import route.teamRoutes
-import route.userRoutes
+import route.*
 import utils.AppEnvironment
 
 @KtorExperimentalAPI
@@ -72,5 +69,6 @@ fun Application.module() {
         loginRoutes()
         teamRoutes()
         projectRoutes()
+        taskStateRoutes()
     }
 }

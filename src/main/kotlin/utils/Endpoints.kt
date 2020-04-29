@@ -15,4 +15,7 @@ object Endpoints {
     object Projects {
         const val Base = "/projects"
     }
+    object Tasks {
+        const val States = "/tasks/states"
+    }
 }
