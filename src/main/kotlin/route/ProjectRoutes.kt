@@ -1,7 +1,6 @@
 package route
 
-import db.data.projects.ProjectCreateBody
-import db.data.projects.ProjectUpdateBody
+import db.data.projects.ProjectBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -22,8 +21,8 @@ fun Routing.projectRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            val teamId = call.parameters["team_id"]?.toIntOrNull() ?: run {
-                call.respond(HttpStatusCode.BadRequest, "No team id provided")
+            val teamId = user.team?.id ?: run {
+                call.respond(HttpStatusCode.NotFound, "User doesn\'t have any team")
                 return@get
             }
             when (val request = projectsService.getTeamProjects(teamId, user)) {
@@ -40,7 +39,7 @@ fun Routing.projectRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            val projectRequest = call.receiveSafe<ProjectCreateBody>() ?: run {
+            val projectRequest = call.receiveSafe<ProjectBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
@@ -53,16 +52,20 @@ fun Routing.projectRoutes() {
             }
         }
 
-        put(Endpoints.Projects.Base) {
+        put(Endpoints.Projects.Base.path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
             }
-            val projectRequest = call.receiveSafe<ProjectUpdateBody>() ?: run {
+            val projectId = call.parameters["id"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val request = projectsService.modifyProject(user, projectRequest.id, projectRequest.name)) {
+            val projectRequest = call.receiveSafe<ProjectBody>() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@put
+            }
+            when (val request = projectsService.modifyProject(user, projectId, projectRequest.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> when (request.e) {
                     is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, request.e.message.orEmpty())
@@ -71,7 +74,7 @@ fun Routing.projectRoutes() {
             }
         }
 
-        delete(Endpoints.Projects.Base) {
+        delete(Endpoints.Projects.Base.path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete

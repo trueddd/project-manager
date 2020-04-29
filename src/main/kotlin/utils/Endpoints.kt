@@ -19,3 +19,7 @@ object Endpoints {
         const val States = "/tasks/states"
     }
 }
+
+fun String.path(parameterName: String): String {
+    return "$this/{$parameterName}"
+}

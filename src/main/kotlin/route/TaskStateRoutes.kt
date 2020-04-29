@@ -1,7 +1,6 @@
 package route
 
-import db.data.tasks.TaskStateCreateBody
-import db.data.tasks.TaskStateUpdateBody
+import db.data.tasks.TaskStateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -33,7 +32,7 @@ fun Routing.taskStateRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            val body = call.receiveSafe<TaskStateCreateBody>() ?: run {
+            val body = call.receiveSafe<TaskStateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
@@ -46,16 +45,20 @@ fun Routing.taskStateRoutes() {
             }
         }
 
-        put(Endpoints.Tasks.States) {
+        put(Endpoints.Tasks.States.path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
             }
-            val body = call.receiveSafe<TaskStateUpdateBody>() ?: run {
+            val stateId = call.parameters["id"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val request = taskStatesService.modifyTaskState(user, body.id, body.name)) {
+            val body = call.receiveSafe<TaskStateBody>() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@put
+            }
+            when (val request = taskStatesService.modifyTaskState(user, stateId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> {
                     val message = request.e.message.orEmpty()
@@ -68,7 +71,7 @@ fun Routing.taskStateRoutes() {
             }
         }
 
-        delete(Endpoints.Tasks.States) {
+        delete(Endpoints.Tasks.States.path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete

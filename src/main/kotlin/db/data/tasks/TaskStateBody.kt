@@ -1,5 +1,5 @@
 package db.data.tasks
 
-data class TaskStateCreateBody(
+data class TaskStateBody(
     val name: String
 )

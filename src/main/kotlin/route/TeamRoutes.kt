@@ -1,7 +1,6 @@
 package route
 
-import db.data.teams.TeamCreateRequestBody
-import db.data.teams.TeamUpdateBody
+import db.data.teams.TeamBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -9,10 +8,7 @@ import io.ktor.response.respond
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
 import service.teams.TeamsService
-import utils.Endpoints
-import utils.ServiceResult
-import utils.receiveSafe
-import utils.user
+import utils.*
 
 fun Routing.teamRoutes() {
 
@@ -51,7 +47,7 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            val requested = call.receiveSafe<TeamCreateRequestBody>() ?: run {
+            val requested = call.receiveSafe<TeamBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
@@ -61,26 +57,30 @@ fun Routing.teamRoutes() {
             }
         }
 
-        put(Endpoints.Teams.Base) {
+        put(Endpoints.Teams.Base.path("id")) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
             }
-            val toUpdate = call.receiveSafe<TeamUpdateBody>() ?: run {
+            val teamId = call.parameters["id"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            if (!teamsService.isUserFromTeam(currentUser.id, toUpdate.id)) {
+            val toUpdate = call.receiveSafe<TeamBody>() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@put
+            }
+            if (!teamsService.isUserFromTeam(currentUser.id, teamId)) {
                 call.respond(HttpStatusCode.Unauthorized, "You are not allowed to edit this team")
                 return@put
             }
-            when (val updated = teamsService.modifyTeam(toUpdate.id, toUpdate.name, toUpdate.country, toUpdate.city)) {
+            when (val updated = teamsService.modifyTeam(teamId, toUpdate.name, toUpdate.country, toUpdate.city)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, updated.data)
                 is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, updated.e.message.orEmpty())
             }
         }
 
-        delete(Endpoints.Teams.Base) {
+        delete(Endpoints.Teams.Base.path("id")) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
