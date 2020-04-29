@@ -1,6 +1,5 @@
 package db.data.projects
 
-data class ProjectUpdateBody(
-    val id: Int,
+data class ProjectBody(
     val name: String
 )
