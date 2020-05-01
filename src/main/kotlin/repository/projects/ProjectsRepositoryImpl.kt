@@ -2,15 +2,21 @@ package repository.projects
 
 import db.dao.Projects
 import db.dao.Teams
+import db.data.User
 import db.data.projects.Project
-import db.data.teams.Team
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
+import utils.toProject
 
 class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), ProjectsRepository {
 
     override fun getTeamProjects(teamId: Int): List<Project> = query {
         Projects.select { Projects.teamId eq teamId }.map { it.toProject(withTeam = false) }
+    }
+
+    override fun getProjectById(id: Int): Project? = query {
+        return@query (Projects leftJoin Teams)
+            .select { Projects.id eq id }.singleOrNull()?.toProject()
     }
 
     override fun createProject(teamId: Int, name: String): Project? = query {
@@ -42,19 +48,12 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
         return@query project?.team?.id == teamId
     }
 
-    private fun ResultRow.toProject(withTeam: Boolean = true): Project {
-        return Project(
-            this[Projects.id].toInt(),
-            this[Projects.name].toString(),
-            this[Projects.createdAt].toLong(),
-            if (withTeam) {
-                Team(
-                    this[Teams.id].toInt(),
-                    this[Teams.name].toString(),
-                    this[Teams.country]?.toString(),
-                    this[Teams.city]?.toString()
-                )
-            } else null
-        )
+    //fixme implement check with `projects-users` table
+    override fun isUserRelatedToProject(user: User, projectId: Int): Boolean = query {
+        if (user.team == null) {
+            return@query false
+        }
+        val project = (Projects leftJoin Teams).select { Projects.id eq projectId }.singleOrNull()?.toProject()
+        return@query project?.team?.id == user.team.id
     }
 }

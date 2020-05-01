@@ -1,4 +1,4 @@
-package route
+package routes
 
 import db.data.UserCreateBody
 import db.data.UserLoginRequest

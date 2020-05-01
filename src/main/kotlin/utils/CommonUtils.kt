@@ -14,3 +14,11 @@ suspend inline fun <reified T : Any> ApplicationCall.receiveSafe(): T? {
         null
     }
 }
+
+fun String.capFirst(): String {
+    return when (length) {
+        0 -> ""
+        1 -> this.capitalize()
+        else -> "${this.first().toString().capitalize()}${this.substring(1)}"
+    }
+}

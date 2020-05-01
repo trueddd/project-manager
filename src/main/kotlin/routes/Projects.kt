@@ -1,4 +1,4 @@
-package route
+package routes
 
 import db.data.projects.ProjectBody
 import io.ktor.application.call
@@ -10,7 +10,7 @@ import org.koin.ktor.ext.inject
 import service.projects.ProjectsService
 import utils.*
 
-fun Routing.projectRoutes() {
+fun Routing.projectsRoutes() {
 
     val projectsService by inject<ProjectsService>()
 
@@ -21,14 +21,10 @@ fun Routing.projectRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            val teamId = user.team?.id ?: run {
-                call.respond(HttpStatusCode.NotFound, "User doesn\'t have any team")
-                return@get
-            }
-            when (val request = projectsService.getTeamProjects(teamId, user)) {
+            when (val request = projectsService.getTeamProjects(user)) {
                 is ServiceResult.Success -> call.respond(request.data)
                 is ServiceResult.Error -> when (request.e) {
-                    is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, request.e.message.orEmpty())
+                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
                     else -> call.respond(HttpStatusCode.InternalServerError)
                 }
             }
@@ -68,6 +64,7 @@ fun Routing.projectRoutes() {
             when (val request = projectsService.modifyProject(user, projectId, projectRequest.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> when (request.e) {
+                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
                     is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, request.e.message.orEmpty())
                     is Errors.Unknown -> call.respond(HttpStatusCode.InternalServerError)
                 }

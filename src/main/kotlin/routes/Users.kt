@@ -1,4 +1,4 @@
-package route
+package routes
 
 import db.data.UserUpdateBody
 import io.ktor.application.call
@@ -13,7 +13,7 @@ import org.koin.ktor.ext.inject
 import service.users.UsersService
 import utils.*
 
-fun Routing.userRoutes() {
+fun Routing.usersRoutes() {
 
     val usersService by inject<UsersService>()
 

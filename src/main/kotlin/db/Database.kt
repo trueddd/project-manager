@@ -1,9 +1,6 @@
 package db
 
-import db.dao.Projects
-import db.dao.TaskStates
-import db.dao.Teams
-import db.dao.Users
+import db.dao.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -19,7 +16,7 @@ fun provideDatabase(): Database {
         println("Connecting DB at ${it.url}")
         transaction(it) {
             println("Creating tables")
-            SchemaUtils.create(Teams, Users, Projects, TaskStates)
+            SchemaUtils.create(Teams, Users, Projects, TaskStates, Epics, Sprints)
         }
     }
 }

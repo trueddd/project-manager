@@ -13,8 +13,8 @@ object Errors {
     }
 
     object Unknown : Exception()
-    data class NotFound(val target: String) : Exception("$target not found")
-    data class Create(val target: String) : Exception("$target creation error")
-    data class Modify(val target: String) : Exception("$target modification error")
-    data class NoAccess(val target: String) : Exception("You have no access to this $target")
+    data class NotFound(val target: String) : Exception("${target.capFirst()} not found")
+    data class Create(val target: String) : Exception("${target.capFirst()} creation error")
+    data class Modify(val target: String) : Exception("${target.capFirst()} modification error")
+    data class NoAccess(val target: String) : Exception("You have no access to this ${target.toLowerCase()}")
 }

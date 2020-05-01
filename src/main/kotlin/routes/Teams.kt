@@ -1,4 +1,4 @@
-package route
+package routes
 
 import db.data.teams.TeamBody
 import io.ktor.application.call
@@ -10,7 +10,7 @@ import org.koin.ktor.ext.inject
 import service.teams.TeamsService
 import utils.*
 
-fun Routing.teamRoutes() {
+fun Routing.teamsRoutes() {
 
     val teamsService by inject<TeamsService>()
 
@@ -28,15 +28,11 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            val teamId = call.parameters["team_id"]?.toIntOrNull() ?: run {
-                call.respond(HttpStatusCode.BadRequest, "No team id provided")
+            if (currentUser.team == null) {
+                call.respond(HttpStatusCode.NotFound, "You have no team")
                 return@get
             }
-            if (!teamsService.isUserFromTeam(currentUser.id, teamId)) {
-                call.respond(HttpStatusCode.Unauthorized, "You are not allowed to get info of requested team")
-                return@get
-            }
-            when (val users = teamsService.getTeamMembers(teamId)) {
+            when (val users = teamsService.getTeamMembers(currentUser.team.id)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, users.data)
                 is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, users.e.message.orEmpty())
             }
@@ -62,19 +58,15 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
             }
-            val teamId = call.parameters["id"]?.toIntOrNull() ?: run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@put
-            }
             val toUpdate = call.receiveSafe<TeamBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            if (!teamsService.isUserFromTeam(currentUser.id, teamId)) {
-                call.respond(HttpStatusCode.Unauthorized, "You are not allowed to edit this team")
+            if (currentUser.team == null) {
+                call.respond(HttpStatusCode.NotFound, "You have no team")
                 return@put
             }
-            when (val updated = teamsService.modifyTeam(teamId, toUpdate.name, toUpdate.country, toUpdate.city)) {
+            when (val updated = teamsService.modifyTeam(currentUser.team.id, toUpdate.name, toUpdate.country, toUpdate.city)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, updated.data)
                 is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, updated.e.message.orEmpty())
             }
@@ -85,15 +77,11 @@ fun Routing.teamRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
             }
-            val toDelete = call.parameters["id"]?.toIntOrNull() ?: run {
-                call.respond(HttpStatusCode.BadRequest, "Specify team you want to delete by sending its id as query-parameter")
+            if (currentUser.team == null) {
+                call.respond(HttpStatusCode.NotFound, "You have no team")
                 return@delete
             }
-            if (!teamsService.isUserFromTeam(currentUser.id, toDelete)) {
-                call.respond(HttpStatusCode.Unauthorized, "You are not allowed to delete this team")
-                return@delete
-            }
-            when (teamsService.deleteTeam(toDelete)) {
+            when (teamsService.deleteTeam(currentUser.team.id)) {
                 true -> call.respond(HttpStatusCode.OK)
                 false -> call.respond(HttpStatusCode.NotFound)
             }
