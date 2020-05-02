@@ -20,7 +20,7 @@ import io.ktor.util.KtorExperimentalAPI
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.slf4j.event.Level
-import route.*
+import routes.*
 import utils.AppEnvironment
 
 @KtorExperimentalAPI
@@ -65,10 +65,12 @@ fun Application.module() {
             call.respond(HttpStatusCode.OK, "Server is up")
         }
 
-        userRoutes()
+        usersRoutes()
         loginRoutes()
-        teamRoutes()
-        projectRoutes()
-        taskStateRoutes()
+        teamsRoutes()
+        projectsRoutes()
+        taskStatesRoutes()
+        epicsRoutes()
+        sprintsRoutes()
     }
 }

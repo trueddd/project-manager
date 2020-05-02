@@ -25,7 +25,10 @@ class TaskStatesServiceImpl(
 
     override fun modifyTaskState(user: User, stateId: Int, stateName: String): ServiceResult<TaskState> {
         if (user.team == null) {
-            return Errors.NotFound("Team").error()
+            return Errors.NoAccess("task state").error()
+        }
+        if (taskStatesRepository.getTaskStateById(stateId) == null) {
+            return Errors.NotFound("task state").error()
         }
         if (taskStatesRepository.getTaskStates(user.team.id, true).none { it.id == stateId }) {
             return Errors.NoAccess("task state").error()
@@ -35,7 +38,10 @@ class TaskStatesServiceImpl(
 
     override fun deleteTaskState(user: User, stateId: Int): ServiceResult<Unit> {
         if (user.team == null) {
-            return Errors.NotFound("Team").error()
+            return Errors.NoAccess("task state").error()
+        }
+        if (taskStatesRepository.getTaskStateById(stateId) == null) {
+            return Errors.NotFound("task state").error()
         }
         if (taskStatesRepository.getTaskStates(user.team.id, true).none { it.id == stateId }) {
             return Errors.NoAccess("task state").error()

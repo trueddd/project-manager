@@ -12,3 +12,7 @@ sealed class ServiceResult<T> {
 fun <T> T.success() = ServiceResult.Success(this)
 
 fun <T, E : Exception> E.error() = ServiceResult.Error<T>(this)
+
+fun <T> ServiceResult.Error<T>.errorMessage(): String {
+    return e.message.orEmpty()
+}

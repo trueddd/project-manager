@@ -6,7 +6,7 @@ import utils.ServiceResult
 
 interface ProjectsService {
 
-    fun getTeamProjects(teamId: Int, user: User): ServiceResult<List<Project>>
+    fun getTeamProjects(user: User): ServiceResult<List<Project>>
 
     fun createProject(user: User, projectName: String): ServiceResult<Project>
 

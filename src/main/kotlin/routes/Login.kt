@@ -1,4 +1,4 @@
-package route
+package routes
 
 import db.data.UserCreateBody
 import db.data.UserLoginRequest
@@ -9,8 +9,7 @@ import io.ktor.routing.Routing
 import io.ktor.routing.post
 import org.koin.ktor.ext.inject
 import service.login.LoginService
-import utils.Endpoints
-import utils.receiveSafe
+import utils.*
 
 fun Routing.loginRoutes() {
 
@@ -21,11 +20,9 @@ fun Routing.loginRoutes() {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val loginResponse = loginService.register(userLogin)
-        if (loginResponse != null) {
-            call.respond(HttpStatusCode.OK, loginResponse)
-        } else {
-            call.respond(HttpStatusCode.InternalServerError)
+        when (val loginResponse = loginService.register(userLogin)) {
+            is ServiceResult.Success -> call.respond(HttpStatusCode.Created, loginResponse.data)
+            is ServiceResult.Error -> respondError(loginResponse)
         }
     }
 
@@ -34,11 +31,9 @@ fun Routing.loginRoutes() {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val refreshResponse = loginService.login(userData)
-        if (refreshResponse != null) {
-            call.respond(HttpStatusCode.OK, refreshResponse)
-        } else {
-            call.respond(HttpStatusCode.InternalServerError)
+        when (val refreshResponse = loginService.login(userData)) {
+            is ServiceResult.Success -> call.respond(HttpStatusCode.OK, refreshResponse.data)
+            is ServiceResult.Error -> respondError(refreshResponse)
         }
     }
 }

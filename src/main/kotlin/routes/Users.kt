@@ -1,4 +1,4 @@
-package route
+package routes
 
 import db.data.UserUpdateBody
 import io.ktor.application.call
@@ -13,7 +13,7 @@ import org.koin.ktor.ext.inject
 import service.users.UsersService
 import utils.*
 
-fun Routing.userRoutes() {
+fun Routing.usersRoutes() {
 
     val usersService by inject<UsersService>()
 
@@ -37,10 +37,7 @@ fun Routing.userRoutes() {
             }
             when (val result = usersService.modifyUser(currentUser.id, toUpdate.name, toUpdate.firstName, toUpdate.lastName)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, result.data)
-                is ServiceResult.Error -> when (val error = result.e) {
-                    is Errors.Users.NameAlreadyUsed -> call.respond(HttpStatusCode.Conflict, error.message.orEmpty())
-                    else -> call.respond(HttpStatusCode.InternalServerError, error.message.orEmpty())
-                }
+                is ServiceResult.Error -> respondError(result)
             }
         }
 

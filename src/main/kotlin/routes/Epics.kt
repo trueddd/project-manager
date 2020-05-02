@@ -1,64 +1,66 @@
-package route
+package routes
 
-import db.data.tasks.TaskStateBody
+import db.data.tasks.EpicCreateBody
+import db.data.tasks.NamedUpdateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
-import service.tasks.states.TaskStatesService
+import service.tasks.epics.EpicsService
 import utils.*
 
-fun Routing.taskStateRoutes() {
+fun Routing.epicsRoutes() {
 
-    val taskStatesService by inject<TaskStatesService>()
+    val epicsService by inject<EpicsService>()
 
     authenticate {
 
-        get(Endpoints.Tasks.States) {
+        get(Endpoints.Projects.Epics.path("project_id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            when (val request = taskStatesService.getAllTaskStates(user)) {
+            val projectId = call.parameters["project_id"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            when (val request = epicsService.getEpics(user, projectId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, request.e.message.orEmpty())
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
-        post(Endpoints.Tasks.States) {
+        post(Endpoints.Projects.Epics) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            val body = call.receiveSafe<TaskStateBody>() ?: run {
+            val body = call.receiveSafe<EpicCreateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            when (val request = taskStatesService.createTaskState(user, body.name)) {
+            when (val request = epicsService.createEpic(user, body.projectId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
-                is ServiceResult.Error -> when (request.e) {
-                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
-                    else -> call.respond(HttpStatusCode.InternalServerError, request.e.message.orEmpty())
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
-        put(Endpoints.Tasks.States.path("id")) {
+        put(Endpoints.Projects.Epics.path("epic_id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
             }
-            val stateId = call.parameters["id"]?.toIntOrNull() ?: run {
+            val epicId = call.parameters["epic_id"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            val body = call.receiveSafe<TaskStateBody>() ?: run {
+            val body = call.receiveSafe<NamedUpdateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val request = taskStatesService.modifyTaskState(user, stateId, body.name)) {
+            when (val request = epicsService.modifyEpic(user, epicId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> {
                     val message = request.e.message.orEmpty()
@@ -71,16 +73,16 @@ fun Routing.taskStateRoutes() {
             }
         }
 
-        delete(Endpoints.Tasks.States.path("id")) {
+        delete(Endpoints.Projects.Epics.path("epic_id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
             }
-            val stateId = call.parameters["id"]?.toIntOrNull() ?: run {
+            val epicId = call.parameters["epic_id"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@delete
             }
-            when (val request = taskStatesService.deleteTaskState(user, stateId)) {
+            when (val request = epicsService.deleteEpic(user, epicId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK)
                 is ServiceResult.Error -> {
                     val message = request.e.message.orEmpty()
