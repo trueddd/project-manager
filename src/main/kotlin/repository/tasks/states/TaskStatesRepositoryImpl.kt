@@ -19,6 +19,10 @@ class TaskStatesRepositoryImpl(database: Database) : BaseRepository(database), T
         }
     }
 
+    override fun getTaskStateById(id: Int): TaskState? = query {
+        return@query TaskStates.select { TaskStates.id eq id }.singleOrNull()?.toState()
+    }
+
     override fun createTaskState(name: String, teamId: Int): TaskState? = query {
         return@query TaskStates.insert {
             it[TaskStates.name] = name

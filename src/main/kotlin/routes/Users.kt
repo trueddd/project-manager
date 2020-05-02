@@ -37,10 +37,7 @@ fun Routing.usersRoutes() {
             }
             when (val result = usersService.modifyUser(currentUser.id, toUpdate.name, toUpdate.firstName, toUpdate.lastName)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, result.data)
-                is ServiceResult.Error -> when (val error = result.e) {
-                    is Errors.Users.NameAlreadyUsed -> call.respond(HttpStatusCode.Conflict, error.message.orEmpty())
-                    else -> call.respond(HttpStatusCode.InternalServerError, error.message.orEmpty())
-                }
+                is ServiceResult.Error -> respondError(result)
             }
         }
 

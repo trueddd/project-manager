@@ -34,13 +34,7 @@ fun Routing.sprintsRoutes() {
             }
             when (request) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -55,14 +49,7 @@ fun Routing.sprintsRoutes() {
             }
             when (val request = sprintsService.createSprint(user, body.epicId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                        else -> call.respond(HttpStatusCode.InternalServerError, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -81,14 +68,7 @@ fun Routing.sprintsRoutes() {
             }
             when (val request = sprintsService.renameSprint(user, sprintId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                        else -> call.respond(HttpStatusCode.InternalServerError, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -103,14 +83,7 @@ fun Routing.sprintsRoutes() {
             }
             when (val request = sprintsService.deleteSprint(user, sprintId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                        else -> call.respond(HttpStatusCode.InternalServerError, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
     }

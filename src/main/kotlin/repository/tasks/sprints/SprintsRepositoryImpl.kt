@@ -21,6 +21,10 @@ class SprintsRepositoryImpl(database: Database) : BaseRepository(database), Spri
         return@query Sprints.select { Sprints.epicId inList epics }.map { it.toSprint() }
     }
 
+    override fun getSprintById(sprintId: Int): Sprint? = query {
+        return@query Sprints.select { Sprints.id eq sprintId }.singleOrNull()?.toSprint()
+    }
+
     override fun createSprint(epicId: Int, name: String): Sprint? = query {
         return@query Sprints.insert {
             it[Sprints.name] = name

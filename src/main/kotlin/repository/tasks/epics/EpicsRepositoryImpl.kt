@@ -42,4 +42,8 @@ class EpicsRepositoryImpl(database: Database) : BaseRepository(database), EpicsR
             .select { Projects.id eq epic[Epics.projectId].toInt() }
             .singleOrNull()?.toProject(false)
     }
+
+    override fun getEpicById(epicId: Int): Epic? = query {
+        return@query Epics.select { Epics.id eq epicId }.singleOrNull()?.toEpic()
+    }
 }

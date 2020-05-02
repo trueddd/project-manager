@@ -14,4 +14,6 @@ interface EpicsRepository {
     fun deleteEpic(epicId: Int): Boolean
 
     fun getProjectByEpicId(epicId: Int): Project?
+
+    fun getEpicById(epicId: Int): Epic?
 }

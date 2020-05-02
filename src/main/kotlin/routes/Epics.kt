@@ -28,13 +28,7 @@ fun Routing.epicsRoutes() {
             }
             when (val request = epicsService.getEpics(user, projectId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -49,14 +43,7 @@ fun Routing.epicsRoutes() {
             }
             when (val request = epicsService.createEpic(user, body.projectId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                        else -> call.respond(HttpStatusCode.InternalServerError, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 

@@ -16,7 +16,10 @@ class EpicsServiceImpl(
 
     override fun getEpics(user: User, projectId: Int): ServiceResult<List<Epic>> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("project").error()
+        }
+        if (projectsRepository.getProjectById(projectId) == null) {
+            return Errors.NotFound("project").error()
         }
         if (!projectsRepository.isProjectFromTeam(projectId, user.team.id)) {
             return Errors.NoAccess("project").error()
@@ -26,7 +29,10 @@ class EpicsServiceImpl(
 
     override fun createEpic(user: User, projectId: Int, epicName: String): ServiceResult<Epic> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("project").error()
+        }
+        if (projectsRepository.getProjectById(projectId) == null) {
+            return Errors.NotFound("project").error()
         }
         if (!projectsRepository.isProjectFromTeam(projectId, user.team.id)) {
             return Errors.NoAccess("project").error()
@@ -36,7 +42,10 @@ class EpicsServiceImpl(
 
     override fun modifyEpic(user: User, epicId: Int, newName: String): ServiceResult<Epic> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("epic").error()
+        }
+        if (epicsRepository.getEpicById(epicId) == null) {
+            return Errors.NotFound("epic").error()
         }
         val project = epicsRepository.getProjectByEpicId(epicId) ?: return Errors.Unknown.error()
         if (!projectsRepository.isUserRelatedToProject(user, project.id)) {
@@ -47,7 +56,10 @@ class EpicsServiceImpl(
 
     override fun deleteEpic(user: User, epicId: Int): ServiceResult<Unit> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("epic").error()
+        }
+        if (epicsRepository.getEpicById(epicId) == null) {
+            return Errors.NotFound("epic").error()
         }
         val project = epicsRepository.getProjectByEpicId(epicId) ?: return Errors.Unknown.error()
         if (!projectsRepository.isUserRelatedToProject(user, project.id)) {

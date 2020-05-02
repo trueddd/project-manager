@@ -23,7 +23,7 @@ fun Routing.taskStatesRoutes() {
             }
             when (val request = taskStatesService.getAllTaskStates(user)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, request.e.message.orEmpty())
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, request.errorMessage())
             }
         }
 
@@ -38,10 +38,7 @@ fun Routing.taskStatesRoutes() {
             }
             when (val request = taskStatesService.createTaskState(user, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
-                is ServiceResult.Error -> when (request.e) {
-                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
-                    else -> call.respond(HttpStatusCode.InternalServerError, request.e.message.orEmpty())
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -60,14 +57,7 @@ fun Routing.taskStatesRoutes() {
             }
             when (val request = taskStatesService.modifyTaskState(user, stateId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                        else -> call.respond(HttpStatusCode.InternalServerError, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -82,14 +72,7 @@ fun Routing.taskStatesRoutes() {
             }
             when (val request = taskStatesService.deleteTaskState(user, stateId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK)
-                is ServiceResult.Error -> {
-                    val message = request.e.message.orEmpty()
-                    when (request.e) {
-                        is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, message)
-                        is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, message)
-                        else -> call.respond(HttpStatusCode.InternalServerError, message)
-                    }
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
     }

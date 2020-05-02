@@ -16,6 +16,7 @@ fun Routing.teamsRoutes() {
 
     authenticate {
 
+        //todo: add routes for adding/deleting teammates
         get(Endpoints.Teams.Base) {
             when (val teams = teamsService.getAllTeams()) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, teams.data)
@@ -34,7 +35,7 @@ fun Routing.teamsRoutes() {
             }
             when (val users = teamsService.getTeamMembers(currentUser.team.id)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, users.data)
-                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, users.e.message.orEmpty())
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, users.errorMessage())
             }
         }
 
@@ -43,13 +44,17 @@ fun Routing.teamsRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
+            if (currentUser.team != null) {
+                call.respond(HttpStatusCode.Conflict, "User already is in team")
+                return@post
+            }
             val requested = call.receiveSafe<TeamBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
             when (val owner = teamsService.registerTeam(currentUser.id, requested.name, requested.country, requested.city)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, owner.data)
-                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, owner.e.message.orEmpty())
+                is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError, owner.errorMessage())
             }
         }
 

@@ -9,6 +9,8 @@ interface SprintsRepository {
 
     fun getSprintsByProject(projectId: Int): List<Sprint>
 
+    fun getSprintById(sprintId: Int): Sprint?
+
     fun createSprint(epicId: Int, name: String): Sprint?
 
     fun renameSprint(sprintId: Int, newName: String): Sprint?

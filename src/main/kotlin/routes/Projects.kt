@@ -23,10 +23,7 @@ fun Routing.projectsRoutes() {
             }
             when (val request = projectsService.getTeamProjects(user)) {
                 is ServiceResult.Success -> call.respond(request.data)
-                is ServiceResult.Error -> when (request.e) {
-                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
-                    else -> call.respond(HttpStatusCode.InternalServerError)
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -41,10 +38,7 @@ fun Routing.projectsRoutes() {
             }
             when (val request = projectsService.createProject(user, projectRequest.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
-                is ServiceResult.Error -> when (request.e) {
-                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
-                    is Errors.Unknown -> call.respond(HttpStatusCode.InternalServerError)
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -63,11 +57,7 @@ fun Routing.projectsRoutes() {
             }
             when (val request = projectsService.modifyProject(user, projectId, projectRequest.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
-                is ServiceResult.Error -> when (request.e) {
-                    is Errors.NotFound -> call.respond(HttpStatusCode.NotFound, request.e.message.orEmpty())
-                    is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, request.e.message.orEmpty())
-                    is Errors.Unknown -> call.respond(HttpStatusCode.InternalServerError)
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
 
@@ -82,10 +72,7 @@ fun Routing.projectsRoutes() {
             }
             when (val request = projectsService.deleteProject(user, projectId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK)
-                is ServiceResult.Error -> when (request.e) {
-                    is Errors.NoAccess -> call.respond(HttpStatusCode.Unauthorized, request.e.message.orEmpty())
-                    is Errors.Unknown -> call.respond(HttpStatusCode.InternalServerError)
-                }
+                is ServiceResult.Error -> respondError(request)
             }
         }
     }

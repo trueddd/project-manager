@@ -45,6 +45,9 @@ class ProjectsServiceImpl(
         if (user.team == null) {
             return Errors.NoAccess("project").error()
         }
+        if (projectsRepository.getProjectById(projectId) == null) {
+            return Errors.NotFound("project").error()
+        }
         if (!projectsRepository.isProjectFromTeam(projectId, user.team.id)) {
             return Errors.NoAccess("project").error()
         }

@@ -18,7 +18,10 @@ class SprintsServiceImpl(
 
     override fun getSprintsByEpic(user: User, epicId: Int): ServiceResult<List<Sprint>> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("epic").error()
+        }
+        if (epicsRepository.getEpicById(epicId) == null) {
+            return Errors.NotFound("epic").error()
         }
         val project = epicsRepository.getProjectByEpicId(epicId) ?: return Errors.Unknown.error()
         if (!projectsRepository.isUserRelatedToProject(user, project.id)) {
@@ -29,7 +32,10 @@ class SprintsServiceImpl(
 
     override fun getSprintsByProject(user: User, projectId: Int): ServiceResult<List<Sprint>> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("project").error()
+        }
+        if (projectsRepository.getProjectById(projectId) == null) {
+            return Errors.NotFound("project").error()
         }
         if (!projectsRepository.isUserRelatedToProject(user, projectId)) {
             return Errors.NoAccess("epic").error()
@@ -39,7 +45,10 @@ class SprintsServiceImpl(
 
     override fun createSprint(user: User, epicId: Int, sprintName: String): ServiceResult<Sprint> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("sprint").error()
+        }
+        if (epicsRepository.getEpicById(epicId) == null) {
+            return Errors.NotFound("epic").error()
         }
         val project = epicsRepository.getProjectByEpicId(epicId) ?: return Errors.Unknown.error()
         if (!projectsRepository.isUserRelatedToProject(user, project.id)) {
@@ -50,7 +59,10 @@ class SprintsServiceImpl(
 
     override fun renameSprint(user: User, sprintId: Int, newName: String): ServiceResult<Sprint> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("sprint").error()
+        }
+        if (sprintsRepository.getSprintById(sprintId) == null) {
+            return Errors.NotFound("sprint").error()
         }
         if (!sprintsRepository.isUserRelatedToSprint(user, sprintId)) {
             return Errors.NoAccess("sprint").error()
@@ -60,7 +72,10 @@ class SprintsServiceImpl(
 
     override fun deleteSprint(user: User, sprintId: Int): ServiceResult<Unit> {
         if (user.team == null) {
-            return Errors.NotFound("team").error()
+            return Errors.NoAccess("sprint").error()
+        }
+        if (sprintsRepository.getSprintById(sprintId) == null) {
+            return Errors.NotFound("sprint").error()
         }
         if (!sprintsRepository.isUserRelatedToSprint(user, sprintId)) {
             return Errors.NoAccess("sprint").error()
