@@ -1,9 +1,6 @@
 package repository.tasks.sprints
 
-import db.dao.Epics
-import db.dao.Projects
-import db.dao.Sprints
-import db.dao.Teams
+import db.dao.*
 import db.data.User
 import db.data.tasks.Sprint
 import org.jetbrains.exposed.sql.*
@@ -46,15 +43,14 @@ class SprintsRepositoryImpl(database: Database) : BaseRepository(database), Spri
         return@query Sprints.deleteWhere { Sprints.id eq sprintId } > 0
     }
 
-    override fun isUserRelatedToSprint(user: User, sprintId: Int): Boolean = query {
-        if (user.team == null) {
-            return@query false
-        }
-        val sprint = Sprints.select { Sprints.id eq sprintId }.singleOrNull() ?: return@query false
-        val epic = Epics.select { Epics.id eq sprint[Sprints.epicId].toInt() }.singleOrNull() ?: return@query false
-        val project = (Projects leftJoin Teams)
+    override fun getUserRightsOnSprint(user: User, sprintId: Int): Int = query {
+        val sprint = Sprints.select { Sprints.id eq sprintId }.singleOrNull() ?: return@query -1
+        val epic = Epics.select { Epics.id eq sprint[Sprints.epicId].toInt() }.singleOrNull() ?: return@query -1
+        val project = Projects
             .select { Projects.id eq epic[Epics.projectId].toInt() }
-            .singleOrNull() ?: return@query false
-        return@query project[Teams.id].toInt() == user.team.id
+            .singleOrNull() ?: return@query -1
+        return@query ProjectsUsers
+            .select { (ProjectsUsers.projectId eq project[Projects.id].toInt()) and (ProjectsUsers.userId eq user.id) }
+            .singleOrNull()?.let { it[ProjectsUsers.rights].toInt() } ?: -1
     }
 }

@@ -14,10 +14,6 @@ class UsersServiceImpl(private val usersRepository: UsersRepository) : UsersServ
         return usersRepository.findUserById(id)?.success() ?: Errors.NotFound("User").error()
     }
 
-    override fun changeTeam(userId: Int, teamId: Int): ServiceResult<User> {
-        return usersRepository.changeTeam(userId, teamId)?.success() ?: Errors.Modify("User team").error()
-    }
-
     override fun modifyUser(userId: Int, name: String?, firstName: String?, lastName: String?): ServiceResult<User> {
         if (name != null) {
             val userWithGivenName = usersRepository.findUserByName(name)

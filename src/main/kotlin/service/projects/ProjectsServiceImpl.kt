@@ -13,28 +13,19 @@ class ProjectsServiceImpl(
 ) : ProjectsService {
 
     override fun getTeamProjects(user: User): ServiceResult<List<Project>> {
-        if (user.team == null) {
-            return Errors.NotFound("team").error()
-        }
-        return projectsRepository.getTeamProjects(user.team.id).success()
+        return projectsRepository.getProjects().success()
     }
 
     override fun createProject(user: User, projectName: String): ServiceResult<Project> {
-        if (user.team == null) {
-            return Errors.NotFound("Team").error()
-        }
-        val project = projectsRepository.createProject(user.team.id, projectName)
+        val project = projectsRepository.createProject(user, projectName)
         return project?.success() ?: Errors.Unknown.error()
     }
 
     override fun modifyProject(user: User, projectId: Int, newName: String): ServiceResult<Project> {
-        if (user.team == null) {
-            return Errors.NoAccess("project").error()
-        }
         if (projectsRepository.getProjectById(projectId) == null) {
             return Errors.NotFound("project").error()
         }
-        if (!projectsRepository.isProjectFromTeam(projectId, user.team.id)) {
+        if (projectsRepository.getUserRightsOnProject(user, projectId) < 0) {
             return Errors.NoAccess("project").error()
         }
         val project = projectsRepository.modifyProject(projectId, newName)
@@ -42,13 +33,10 @@ class ProjectsServiceImpl(
     }
 
     override fun deleteProject(user: User, projectId: Int): ServiceResult<Unit> {
-        if (user.team == null) {
-            return Errors.NoAccess("project").error()
-        }
         if (projectsRepository.getProjectById(projectId) == null) {
             return Errors.NotFound("project").error()
         }
-        if (!projectsRepository.isProjectFromTeam(projectId, user.team.id)) {
+        if (projectsRepository.getUserRightsOnProject(user, projectId) < 0) {
             return Errors.NoAccess("project").error()
         }
         val deleted = projectsRepository.deleteProject(projectId)

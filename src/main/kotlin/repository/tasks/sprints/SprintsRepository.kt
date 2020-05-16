@@ -17,5 +17,5 @@ interface SprintsRepository {
 
     fun deleteSprint(sprintId: Int): Boolean
 
-    fun isUserRelatedToSprint(user: User, sprintId: Int): Boolean
+    fun getUserRightsOnSprint(user: User, sprintId: Int): Int
 }

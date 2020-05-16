@@ -7,26 +7,19 @@ import repository.BaseRepository
 
 class TaskStatesRepositoryImpl(database: Database) : BaseRepository(database), TaskStatesRepository {
 
-    override fun getTaskStates(teamId: Int?, onlyTeam: Boolean): List<TaskState> = query {
-        if (onlyTeam) {
-            TaskStates
-                .select { TaskStates.teamId eq teamId }
-                .map { it.toState() }
-        } else {
-            TaskStates
-                .select { (TaskStates.teamId eq teamId) or (TaskStates.teamId.isNull()) }
-                .map { it.toState() }
-        }
+    override fun getTaskStates(): List<TaskState> = query {
+        TaskStates
+            .selectAll()
+            .map { it.toState() }
     }
 
     override fun getTaskStateById(id: Int): TaskState? = query {
         return@query TaskStates.select { TaskStates.id eq id }.singleOrNull()?.toState()
     }
 
-    override fun createTaskState(name: String, teamId: Int): TaskState? = query {
+    override fun createTaskState(name: String): TaskState? = query {
         return@query TaskStates.insert {
             it[TaskStates.name] = name
-            it[TaskStates.teamId] = teamId
         }.resultedValues?.firstOrNull()?.toState()
     }
 

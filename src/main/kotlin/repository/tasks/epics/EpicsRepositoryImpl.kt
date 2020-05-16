@@ -40,7 +40,7 @@ class EpicsRepositoryImpl(database: Database) : BaseRepository(database), EpicsR
         val epic = Epics.select { Epics.id eq epicId }.singleOrNull() ?: return@query null
         return@query Projects
             .select { Projects.id eq epic[Epics.projectId].toInt() }
-            .singleOrNull()?.toProject(false)
+            .singleOrNull()?.toProject()
     }
 
     override fun getEpicById(epicId: Int): Epic? = query {
