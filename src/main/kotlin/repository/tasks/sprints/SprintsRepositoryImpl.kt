@@ -9,12 +9,8 @@ import utils.toSprint
 
 class SprintsRepositoryImpl(database: Database) : BaseRepository(database), SprintsRepository {
 
-    override fun getSprints(epicId: Int): List<Sprint> = query {
-        return@query Sprints.select { Sprints.epicId eq epicId }.map { it.toSprint() }
-    }
-
-    override fun getSprintsByProject(projectId: Int): List<Sprint> = query {
-        val epics = Epics.select { Epics.projectId eq projectId }.map { it[Epics.id].toInt() }
+    override fun getSprints(projectId: Int, epicId: Int?): List<Sprint> = query {
+        val epics = epicId?.let { listOf(it) } ?: Epics.select { Epics.projectId eq projectId }.map { it[Epics.id].toInt() }
         return@query Sprints.select { Sprints.epicId inList epics }.map { it.toSprint() }
     }
 

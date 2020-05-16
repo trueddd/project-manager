@@ -17,7 +17,7 @@ fun Routing.epicsRoutes() {
 
     authenticate {
 
-        get(Endpoints.Projects.Epics.path("project_id")) {
+        get(Endpoints.Projects.path("project_id").route(Endpoints.Epics)) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
@@ -32,22 +32,26 @@ fun Routing.epicsRoutes() {
             }
         }
 
-        post(Endpoints.Projects.Epics) {
+        post(Endpoints.Projects.path("projectId").route(Endpoints.Epics)) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            val projectId = call.parameters["projectId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
             val body = call.receiveSafe<EpicCreateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            when (val request = epicsService.createEpic(user, body.projectId, body.name)) {
+            when (val request = epicsService.createEpic(user, projectId, body.name)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
         }
 
-        put(Endpoints.Projects.Epics.path("epic_id")) {
+        put(Endpoints.Projects.route(Endpoints.Epics).path("epic_id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
@@ -73,7 +77,7 @@ fun Routing.epicsRoutes() {
             }
         }
 
-        delete(Endpoints.Projects.Epics.path("epic_id")) {
+        delete(Endpoints.Projects.route(Endpoints.Epics).path("epic_id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete

@@ -1,12 +1,14 @@
 package repository.projects
 
-import db.dao.Projects
-import db.dao.ProjectsUsers
+import db.dao.*
 import db.data.User
 import db.data.projects.Project
+import db.data.projects.ProjectMember
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
+import utils.isOwner
 import utils.toProject
+import utils.toUser
 
 class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), ProjectsRepository {
 
@@ -52,5 +54,49 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
         return@query ProjectsUsers
             .select { (ProjectsUsers.projectId eq projectId) and (ProjectsUsers.userId eq user.id) }
             .singleOrNull()?.let { it[ProjectsUsers.rights].toInt() } ?: -1
+    }
+
+    override fun getUserRightsOnEpic(user: User, epicId: Int): Int = query {
+        val projectId = Epics.select { Epics.id eq epicId }
+            .singleOrNull()?.let {
+                it[Epics.projectId].toInt()
+            } ?: return@query -1
+        return@query getUserRightsOnProject(user, projectId)
+    }
+
+    override fun getUserRightsOnSprint(user: User, sprintId: Int): Int = query {
+        val epicId = Sprints.select { Sprints.id eq sprintId }
+            .singleOrNull()?.let {
+                it[Sprints.epicId].toInt()
+            } ?: return@query -1
+        return@query getUserRightsOnEpic(user, epicId)
+    }
+
+    override fun getUserRightsOnTask(user: User, taskId: Int): Int = query {
+        val sprintId = Tasks.select { Tasks.id eq taskId }
+            .singleOrNull()?.let {
+                it[Tasks.sprintId].toInt()
+            } ?: return@query -1
+        return@query getUserRightsOnSprint(user, sprintId)
+    }
+
+    override fun getProjectMembers(projectId: Int): List<ProjectMember> = query {
+        return@query (ProjectsUsers leftJoin Users)
+            .select { ProjectsUsers.projectId eq projectId }
+            .map { ProjectMember(it.toUser(), it.isOwner()) }
+    }
+
+    override fun addProjectMember(projectId: Int, userId: Int): Boolean = query {
+        return@query ProjectsUsers.insert {
+            it[ProjectsUsers.projectId] = projectId
+            it[ProjectsUsers.userId] = userId
+            it[rights] = 0
+        }.resultedValues?.firstOrNull() != null
+    }
+
+    override fun removeProjectMember(projectId: Int, userId: Int): Boolean = query {
+        return@query ProjectsUsers.deleteWhere {
+            (ProjectsUsers.projectId eq projectId) and (ProjectsUsers.userId eq userId)
+        } > 0
     }
 }

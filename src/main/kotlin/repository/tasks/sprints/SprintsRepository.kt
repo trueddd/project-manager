@@ -5,9 +5,7 @@ import db.data.tasks.Sprint
 
 interface SprintsRepository {
 
-    fun getSprints(epicId: Int): List<Sprint>
-
-    fun getSprintsByProject(projectId: Int): List<Sprint>
+    fun getSprints(projectId: Int, epicId: Int?): List<Sprint>
 
     fun getSprintById(sprintId: Int): Sprint?
 

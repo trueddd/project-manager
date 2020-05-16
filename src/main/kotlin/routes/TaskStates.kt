@@ -16,7 +16,7 @@ fun Routing.taskStatesRoutes() {
 
     authenticate {
 
-        get(Endpoints.Tasks.States) {
+        get(Endpoints.Tasks.route(Endpoints.States)) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
@@ -27,7 +27,7 @@ fun Routing.taskStatesRoutes() {
             }
         }
 
-        post(Endpoints.Tasks.States) {
+        post(Endpoints.Tasks.route(Endpoints.States)) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
@@ -42,7 +42,7 @@ fun Routing.taskStatesRoutes() {
             }
         }
 
-        put(Endpoints.Tasks.States.path("id")) {
+        put(Endpoints.Tasks.route(Endpoints.States).path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
@@ -61,7 +61,7 @@ fun Routing.taskStatesRoutes() {
             }
         }
 
-        delete(Endpoints.Tasks.States.path("id")) {
+        delete(Endpoints.Tasks.route(Endpoints.States).path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete

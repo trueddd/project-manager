@@ -1,6 +1,5 @@
 package db.dao
 
-import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
 
 object ProjectsUsers : Table() {
@@ -10,5 +9,5 @@ object ProjectsUsers : Table() {
 
     override val tableName = "projects_users"
 
-    fun ResultRow.isOwner() = this[rights].toInt() >= 300
+    override val primaryKey = PrimaryKey(projectId, userId, name = "projects_users_pk")
 }

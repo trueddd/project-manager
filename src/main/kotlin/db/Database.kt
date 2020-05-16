@@ -16,7 +16,7 @@ fun provideDatabase(): Database {
         println("Connecting DB at ${it.url}")
         transaction(it) {
             println("Creating tables")
-            SchemaUtils.create(Users, Projects, TaskStates, Epics, Sprints)
+            SchemaUtils.create(Users, Projects, TaskStates, Epics, Sprints, ProjectsUsers)
         }
     }
 }

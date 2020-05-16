@@ -19,14 +19,14 @@ fun Routing.usersRoutes() {
 
     authenticate {
 
-        get(Endpoints.Users.Base) {
+        get(Endpoints.Users) {
             when (val users = usersService.getAllUsers()) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, users.data)
                 is ServiceResult.Error -> call.respond(HttpStatusCode.InternalServerError)
             }
         }
 
-        put(Endpoints.Users.Base) {
+        put(Endpoints.Users) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
@@ -41,7 +41,7 @@ fun Routing.usersRoutes() {
             }
         }
 
-        delete(Endpoints.Users.Base) {
+        delete(Endpoints.Users) {
             val currentUser = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete

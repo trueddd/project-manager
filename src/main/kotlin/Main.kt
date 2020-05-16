@@ -71,5 +71,6 @@ fun Application.module() {
         taskStatesRoutes()
         epicsRoutes()
         sprintsRoutes()
+        taskRoutes()
     }
 }

@@ -5,6 +5,7 @@ import db.dao.Users
 import db.data.UserCreateBody
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
+import utils.toUser
 import java.math.BigInteger
 import java.security.MessageDigest
 
@@ -64,15 +65,6 @@ class UsersRepositoryImpl(database: Database) : BaseRepository(database), UsersR
         return query {
             Users.deleteWhere { Users.id eq id } > 0
         }
-    }
-
-    private fun ResultRow.toUser(): User {
-        return User(
-            this[Users.id].toInt(),
-            this[Users.name].toString(),
-            this[Users.firstName]?.toString(),
-            this[Users.lastName]?.toString()
-        )
     }
 
     private fun String.hash(length: Int = 64): String {

@@ -1,87 +1,90 @@
 package routes
 
-import db.data.tasks.NamedUpdateBody
-import db.data.tasks.SprintCreateBody
+import db.data.tasks.TaskCreateBody
+import db.data.tasks.TaskUpdateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
-import service.tasks.sprints.SprintsService
+import service.tasks.TasksService
 import utils.*
 
-fun Routing.sprintsRoutes() {
+fun Routing.taskRoutes() {
 
-    val sprintsService by inject<SprintsService>()
+    val tasksService by inject<TasksService>()
 
     authenticate {
 
-        get(Endpoints.Projects.path("projectId").route(Endpoints.Epics).route(Endpoints.Sprints)) {
+        get(Endpoints.Tasks) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            val projectId = call.parameters["projectId"]?.toIntOrNull() ?: run {
+            val projectId = call.parameters["project_id"]?.toIntOrNull()
+            val epicId = call.parameters["epic_id"]?.toIntOrNull()
+            val sprintId = call.parameters["sprint_id"]?.toIntOrNull()
+            val request = when {
+                sprintId != null -> tasksService.getTaskBySprint(user, sprintId)
+                epicId != null -> tasksService.getTasksByEpic(user, epicId)
+                projectId != null -> tasksService.getTasksByProject(user, projectId)
+                else -> null
+            } ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
             }
-            val epicId = call.parameters["epic_id"]?.toIntOrNull()
-            when (val request = sprintsService.getSprints(user, projectId, epicId)) {
+            when (request) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
         }
 
-        post(Endpoints.Projects.route(Endpoints.Epics).path("epicId").route(Endpoints.Sprints)) {
+        post(Endpoints.Tasks) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            val epicId = call.parameters["epicId"]?.toIntOrNull() ?: run {
-                call.respond(HttpStatusCode.Unauthorized)
-                return@post
-            }
-            val body = call.receiveSafe<SprintCreateBody>() ?: run {
+            val body = call.receiveSafe<TaskCreateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            when (val request = sprintsService.createSprint(user, epicId, body.name)) {
+            when (val request = tasksService.createTask(user, body)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
         }
 
-        put(Endpoints.Projects.route(Endpoints.Epics).route(Endpoints.Sprints).path("sprint_id")) {
+        put(Endpoints.Tasks.path("taskId")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
             }
-            val sprintId = call.parameters["sprint_id"]?.toIntOrNull() ?: run {
+            val taskId = call.parameters["taskId"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            val body = call.receiveSafe<NamedUpdateBody>() ?: run {
+            val body = call.receiveSafe<TaskUpdateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val request = sprintsService.renameSprint(user, sprintId, body.name)) {
+            when (val request = tasksService.modifyTask(user, taskId, body)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
         }
 
-        delete(Endpoints.Projects.route(Endpoints.Epics).route(Endpoints.Sprints).path("sprint_id")) {
+        delete(Endpoints.Tasks.path("taskId")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
             }
-            val sprintId = call.parameters["sprint_id"]?.toIntOrNull() ?: run {
+            val taskId = call.parameters["taskId"]?.toIntOrNull() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@delete
             }
-            when (val request = sprintsService.deleteSprint(user, sprintId)) {
-                is ServiceResult.Success -> call.respond(HttpStatusCode.OK)
+            when (val request = tasksService.deleteTask(user, taskId)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
         }

@@ -16,7 +16,7 @@ fun Routing.projectsRoutes() {
 
     authenticate {
 
-        get(Endpoints.Projects.Base) {
+        get(Endpoints.Projects) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
@@ -27,7 +27,7 @@ fun Routing.projectsRoutes() {
             }
         }
 
-        post(Endpoints.Projects.Base) {
+        post(Endpoints.Projects) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
@@ -42,7 +42,7 @@ fun Routing.projectsRoutes() {
             }
         }
 
-        put(Endpoints.Projects.Base.path("id")) {
+        put(Endpoints.Projects.path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@put
@@ -61,7 +61,7 @@ fun Routing.projectsRoutes() {
             }
         }
 
-        delete(Endpoints.Projects.Base.path("id")) {
+        delete(Endpoints.Projects.path("id")) {
             val user = call.user ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
@@ -72,6 +72,59 @@ fun Routing.projectsRoutes() {
             }
             when (val request = projectsService.deleteProject(user, projectId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
+
+        get(Endpoints.Projects.path("id").route(Endpoints.Users)) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+            val projectId = call.parameters["id"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No project id provided")
+                return@get
+            }
+            when (val request = projectsService.getProjectMembers(user, projectId)) {
+                is ServiceResult.Success -> call.respond(request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
+
+        post(Endpoints.Projects.path("projectId").route(Endpoints.Users).path("userId")) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            val projectId = call.parameters["projectId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No project id provided")
+                return@post
+            }
+            val userId = call.parameters["userId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No user id provided")
+                return@post
+            }
+            when (val request = projectsService.addProjectMember(user, projectId, userId)) {
+                is ServiceResult.Success -> call.respond(request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
+
+        delete(Endpoints.Projects.path("projectId").route(Endpoints.Users).path("userId")) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@delete
+            }
+            val projectId = call.parameters["projectId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No project id provided")
+                return@delete
+            }
+            val userId = call.parameters["userId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No user id provided")
+                return@delete
+            }
+            when (val request = projectsService.removeProjectMember(user, projectId, userId)) {
+                is ServiceResult.Success -> call.respond(request.data)
                 is ServiceResult.Error -> respondError(request)
             }
         }

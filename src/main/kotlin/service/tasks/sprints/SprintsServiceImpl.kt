@@ -16,25 +16,19 @@ class SprintsServiceImpl(
     private val projectsRepository: ProjectsRepository
 ) : SprintsService {
 
-    override fun getSprintsByEpic(user: User, epicId: Int): ServiceResult<List<Sprint>> {
-        if (epicsRepository.getEpicById(epicId) == null) {
-            return Errors.NotFound("epic").error()
-        }
-        val project = epicsRepository.getProjectByEpicId(epicId) ?: return Errors.Unknown.error()
-        if (projectsRepository.getUserRightsOnProject(user, project.id) < 0) {
-            return Errors.NoAccess("epic").error()
-        }
-        return sprintsRepository.getSprints(epicId).success()
-    }
-
-    override fun getSprintsByProject(user: User, projectId: Int): ServiceResult<List<Sprint>> {
+    override fun getSprints(user: User, projectId: Int, epicId: Int?): ServiceResult<List<Sprint>> {
         if (projectsRepository.getProjectById(projectId) == null) {
             return Errors.NotFound("project").error()
         }
-        if (projectsRepository.getUserRightsOnProject(user, projectId) < 0) {
-            return Errors.NoAccess("epic").error()
+        epicId?.let {
+            if (epicsRepository.getEpicById(it) == null) {
+                return Errors.NotFound("epic").error()
+            }
         }
-        return sprintsRepository.getSprintsByProject(projectId).success()
+        if (projectsRepository.getUserRightsOnProject(user, projectId) < 0) {
+            return Errors.NoAccess("project").error()
+        }
+        return sprintsRepository.getSprints(projectId, epicId).success()
     }
 
     override fun createSprint(user: User, epicId: Int, sprintName: String): ServiceResult<Sprint> {

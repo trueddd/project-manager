@@ -5,23 +5,18 @@ object Endpoints {
         const val Register = "/register"
         const val Refresh = "/login"
     }
-    object Users {
-        const val Base = "/users"
-    }
-    object Teams {
-        const val Base = "/teams"
-        const val Members = "$Base/members"
-    }
-    object Projects {
-        const val Base = "/projects"
-        const val Epics = "/projects/epics"
-        const val Sprints = "/projects/sprints"
-    }
-    object Tasks {
-        const val States = "/tasks/states"
-    }
+    const val Projects = "/projects"
+    const val Users = "/users"
+    const val Epics = "/epics"
+    const val Sprints = "/sprints"
+    const val States = "/states"
+    const val Tasks = "/tasks"
 }
 
 fun String.path(parameterName: String): String {
     return "$this/{$parameterName}"
+}
+
+fun String.route(routeName: String): String {
+    return "$this/$routeName"
 }
