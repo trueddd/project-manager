@@ -13,17 +13,9 @@ interface UsersRepository {
 
     fun findUserByName(name: String): User?
 
-    fun findUsersByTeamId(teamId: Int): List<User>
-
     fun addNewUser(user: UserCreateBody): User?
-
-    fun changeTeam(userId: Int, teamId: Int): User?
 
     fun modifyUser(id: Int, name: String? = null, firstName: String? = null, lastName: String? = null): User?
 
-    fun dropTeam(userId: Int): User?
-
     fun deleteUser(id: Int): Boolean
-
-    fun isUserFromTeam(userId: Int, teamId: Int): Boolean
 }

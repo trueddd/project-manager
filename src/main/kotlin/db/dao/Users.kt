@@ -8,7 +8,6 @@ object Users : Table() {
     val firstName = varchar("first_name", 20).nullable()
     val lastName = varchar("last_name", 20).nullable()
     val passHash = varchar("pass_hash", 64)
-    val teamId = (integer("organization_id") references Teams.id).nullable()
 
     override val primaryKey = PrimaryKey(id, name = "users_pk")
 

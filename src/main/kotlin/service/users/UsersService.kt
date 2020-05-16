@@ -9,8 +9,6 @@ interface UsersService {
 
     fun getUserById(id: Int): ServiceResult<User>
 
-    fun changeTeam(userId: Int, teamId: Int): ServiceResult<User>
-
     fun modifyUser(userId: Int, name: String? = null, firstName: String? = null, lastName: String? = null): ServiceResult<User>
 
     fun deleteUser(userId: Int): Boolean

@@ -6,9 +6,7 @@ import utils.ServiceResult
 
 interface SprintsService {
 
-    fun getSprintsByEpic(user: User, epicId: Int): ServiceResult<List<Sprint>>
-
-    fun getSprintsByProject(user: User, projectId: Int): ServiceResult<List<Sprint>>
+    fun getSprints(user: User, projectId: Int, epicId: Int?): ServiceResult<List<Sprint>>
 
     fun createSprint(user: User, epicId: Int, sprintName: String): ServiceResult<Sprint>
 

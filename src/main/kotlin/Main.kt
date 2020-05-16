@@ -67,10 +67,10 @@ fun Application.module() {
 
         usersRoutes()
         loginRoutes()
-        teamsRoutes()
         projectsRoutes()
         taskStatesRoutes()
         epicsRoutes()
         sprintsRoutes()
+        taskRoutes()
     }
 }
