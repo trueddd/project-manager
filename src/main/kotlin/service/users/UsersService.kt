@@ -1,6 +1,7 @@
 package service.users
 
 import db.data.User
+import db.data.UserUpdateBody
 import utils.ServiceResult
 
 interface UsersService {
@@ -9,7 +10,7 @@ interface UsersService {
 
     fun getUserById(id: Int): ServiceResult<User>
 
-    fun modifyUser(userId: Int, name: String? = null, firstName: String? = null, lastName: String? = null): ServiceResult<User>
+    fun modifyUser(userId: Int, body: UserUpdateBody): ServiceResult<User>
 
     fun deleteUser(userId: Int): Boolean
 }

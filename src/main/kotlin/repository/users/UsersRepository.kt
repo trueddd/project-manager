@@ -2,6 +2,7 @@ package repository.users
 
 import db.data.User
 import db.data.UserCreateBody
+import db.data.UserUpdateBody
 
 interface UsersRepository {
 
@@ -15,7 +16,7 @@ interface UsersRepository {
 
     fun addNewUser(user: UserCreateBody): User?
 
-    fun modifyUser(id: Int, name: String? = null, firstName: String? = null, lastName: String? = null): User?
+    fun modifyUser(id: Int, body: UserUpdateBody): User?
 
     fun deleteUser(id: Int): Boolean
 }

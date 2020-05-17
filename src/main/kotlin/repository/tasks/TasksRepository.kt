@@ -1,8 +1,7 @@
 package repository.tasks
 
-import db.data.tasks.Task
-import db.data.tasks.TaskCreateBody
-import db.data.tasks.TaskUpdateBody
+import db.data.User
+import db.data.tasks.*
 
 interface TasksRepository {
 
@@ -19,4 +18,16 @@ interface TasksRepository {
     fun modifyTask(taskId: Int, updateBody: TaskUpdateBody): Task?
 
     fun deleteTask(taskId: Int): Boolean
+
+    fun getUserRightsOnTask(user: User, taskId: Int): Int
+
+    fun getWorklogById(worklogId: Int): Worklog?
+
+    fun createWorklog(userId: Int, taskId: Int, createBody: WorklogCreateBody): Task?
+
+    fun modifyWorklog(worklogId: Int, updateBody: WorklogUpdateBody): Task?
+
+    fun isUserWorklog(userId: Int, worklogId: Int): Boolean
+
+    fun deleteWorklog(worklogId: Int): Boolean
 }

@@ -35,7 +35,7 @@ fun Routing.usersRoutes() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val result = usersService.modifyUser(currentUser.id, toUpdate.name, toUpdate.firstName, toUpdate.lastName)) {
+            when (val result = usersService.modifyUser(currentUser.id, toUpdate)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, result.data)
                 is ServiceResult.Error -> respondError(result)
             }

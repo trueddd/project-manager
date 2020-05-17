@@ -72,13 +72,13 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
         return@query getUserRightsOnEpic(user, epicId)
     }
 
-    override fun getUserRightsOnTask(user: User, taskId: Int): Int = query {
-        val sprintId = Tasks.select { Tasks.id eq taskId }
-            .singleOrNull()?.let {
-                it[Tasks.sprintId].toInt()
-            } ?: return@query -1
-        return@query getUserRightsOnSprint(user, sprintId)
-    }
+//    override fun getUserRightsOnTask(user: User, taskId: Int): Int = query {
+//        val sprintId = Tasks.select { Tasks.id eq taskId }
+//            .singleOrNull()?.let {
+//                it[Tasks.sprintId].toInt()
+//            } ?: return@query -1
+//        return@query getUserRightsOnSprint(user, sprintId)
+//    }
 
     override fun getProjectMembers(projectId: Int): List<ProjectMember> = query {
         return@query (ProjectsUsers leftJoin Users)

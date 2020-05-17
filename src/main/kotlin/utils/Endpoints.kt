@@ -11,6 +11,7 @@ object Endpoints {
     const val Sprints = "/sprints"
     const val States = "/states"
     const val Tasks = "/tasks"
+    const val Worklogs = "/worklogs"
 }
 
 fun String.path(parameterName: String): String {

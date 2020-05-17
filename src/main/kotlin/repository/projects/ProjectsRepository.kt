@@ -22,8 +22,6 @@ interface ProjectsRepository {
 
     fun getUserRightsOnSprint(user: User, sprintId: Int): Int
 
-    fun getUserRightsOnTask(user: User, taskId: Int): Int
-
     fun getProjectMembers(projectId: Int): List<ProjectMember>
 
     fun addProjectMember(projectId: Int, userId: Int): Boolean
