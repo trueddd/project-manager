@@ -2,6 +2,8 @@ package routes
 
 import db.data.tasks.TaskCreateBody
 import db.data.tasks.TaskUpdateBody
+import db.data.tasks.WorklogCreateBody
+import db.data.tasks.WorklogUpdateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -84,6 +86,61 @@ fun Routing.taskRoutes() {
                 return@delete
             }
             when (val request = tasksService.deleteTask(user, taskId)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
+
+        // worklogs
+
+        post(Endpoints.Tasks.path("taskId").route(Endpoints.Worklogs)) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            val taskId = call.parameters["taskId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            val body = call.receiveSafe<WorklogCreateBody>() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            when (val request = tasksService.createWorklog(user, taskId, body)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
+
+        put(Endpoints.Tasks.route(Endpoints.Worklogs).path("worklogId")) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@put
+            }
+            val worklogId = call.parameters["worklogId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@put
+            }
+            val body = call.receiveSafe<WorklogUpdateBody>() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@put
+            }
+            when (val request = tasksService.modifyWorklog(user, worklogId, body)) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
+
+        delete(Endpoints.Tasks.route(Endpoints.Worklogs).path("worklogId")) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@delete
+            }
+            val worklogId = call.parameters["worklogId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@delete
+            }
+            when (val request = tasksService.deleteWorklog(user, worklogId)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> respondError(request)
             }

@@ -3,6 +3,7 @@ package repository.users
 import db.data.User
 import db.dao.Users
 import db.data.UserCreateBody
+import db.data.UserUpdateBody
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
 import utils.toUser
@@ -22,6 +23,9 @@ class UsersRepositoryImpl(database: Database) : BaseRepository(database), UsersR
                 it[passHash] = user.pass.hash()
                 it[firstName] = user.firstName
                 it[lastName] = user.lastName
+                it[phone] = user.phone
+                it[email] = user.email
+                it[teamStatus] = user.teamStatus
             }
             Users.select { Users.name eq user.name }.singleOrNull()?.toUser()
         }
@@ -47,12 +51,15 @@ class UsersRepositoryImpl(database: Database) : BaseRepository(database), UsersR
         }
     }
 
-    override fun modifyUser(id: Int, name: String?, firstName: String?, lastName: String?): User? {
+    override fun modifyUser(id: Int, body: UserUpdateBody): User? {
         return query {
             val affected = Users.update({ Users.id eq id }) {
-                name?.let { newName -> it[this.name] = newName }
-                firstName?.let { newFirst -> it[this.firstName] = newFirst }
-                lastName?.let { newLast -> it[this.lastName] = newLast }
+                body.name?.let { newName -> it[name] = newName }
+                body.firstName?.let { newFirst -> it[firstName] = newFirst }
+                body.lastName?.let { newLast -> it[lastName] = newLast }
+                body.phone?.let { newLast -> it[phone] = newLast }
+                body.email?.let { newLast -> it[email] = newLast }
+                body.teamStatus?.let { newLast -> it[teamStatus] = newLast }
             }
             if (affected <= 0) {
                 return@query null

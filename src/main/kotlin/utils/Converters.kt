@@ -3,10 +3,7 @@ package utils
 import db.dao.*
 import db.data.User
 import db.data.projects.Project
-import db.data.tasks.Epic
-import db.data.tasks.Sprint
-import db.data.tasks.Task
-import db.data.tasks.TaskState
+import db.data.tasks.*
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toProject(): Project {
@@ -30,13 +27,16 @@ fun ResultRow.toUser(): User {
         this[Users.id].toInt(),
         this[Users.name].toString(),
         this[Users.firstName]?.toString(),
-        this[Users.lastName]?.toString()
+        this[Users.lastName]?.toString(),
+        this[Users.phone]?.toString(),
+        this[Users.email]?.toString(),
+        this[Users.teamStatus]?.toString()
     )
 }
 
 fun ResultRow.isOwner() = this[ProjectsUsers.rights].toInt() >= 300
 
-fun ResultRow.toTask(): Task {
+fun ResultRow.toTask(executors: List<User>?, worklogs: List<Worklog>?): Task {
     return Task(
         this[Tasks.id].toInt(),
         this[Tasks.name].toString(),
@@ -44,6 +44,18 @@ fun ResultRow.toTask(): Task {
         this[Tasks.createdAt].toLong(),
         TaskState(this[TaskStates.id].toInt(), this[TaskStates.name].toString()),
         this.toSprint(),
-        this.toUser()
+        this.toUser(),
+        executors ?: emptyList(),
+        worklogs ?: emptyList()
+    )
+}
+
+fun ResultRow.toWorklog(): Worklog {
+    return Worklog(
+        this[WorkLogs.id].toInt(),
+        this.toUser(),
+        this[WorkLogs.startedAt].toLong(),
+        this[WorkLogs.duration].toLong(),
+        this[WorkLogs.comment]?.toString()
     )
 }

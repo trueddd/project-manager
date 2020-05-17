@@ -9,5 +9,7 @@ data class Task(
     val createdAt: Long,
     val state: TaskState,
     val sprint: Sprint,
-    val creator: User
+    val creator: User,
+    val executors: List<User> = emptyList(),
+    val worklogs: List<Worklog> = emptyList()
 )

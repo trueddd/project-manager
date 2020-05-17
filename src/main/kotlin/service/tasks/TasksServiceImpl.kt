@@ -1,9 +1,7 @@
 package service.tasks
 
 import db.data.User
-import db.data.tasks.Task
-import db.data.tasks.TaskCreateBody
-import db.data.tasks.TaskUpdateBody
+import db.data.tasks.*
 import repository.projects.ProjectsRepository
 import repository.tasks.TasksRepository
 import repository.tasks.epics.EpicsRepository
@@ -61,7 +59,7 @@ class TasksServiceImpl(
         if (tasksRepository.getTaskById(taskId) == null) {
             return Errors.NotFound("task").error()
         }
-        if (projectsRepository.getUserRightsOnTask(user, taskId) < 0) {
+        if (tasksRepository.getUserRightsOnTask(user, taskId) < 0) {
             return Errors.NoAccess("task").error()
         }
         return tasksRepository.modifyTask(taskId, body)?.success() ?: Errors.Unknown.error()
@@ -71,9 +69,39 @@ class TasksServiceImpl(
         if (tasksRepository.getTaskById(taskId) == null) {
             return Errors.NotFound("task").error()
         }
-        if (projectsRepository.getUserRightsOnTask(user, taskId) < 0) {
+        if (tasksRepository.getUserRightsOnTask(user, taskId) < 0) {
             return Errors.NoAccess("task").error()
         }
         return if (tasksRepository.deleteTask(taskId)) Unit.success() else Errors.Unknown.error()
+    }
+
+    override fun createWorklog(user: User, taskId: Int, body: WorklogCreateBody): ServiceResult<Task> {
+        if (tasksRepository.getTaskById(taskId) == null) {
+            return Errors.NotFound("task").error()
+        }
+        if (tasksRepository.getUserRightsOnTask(user, taskId) < 0) {
+            return Errors.NoAccess("task").error()
+        }
+        return tasksRepository.createWorklog(user.id, taskId, body)?.success() ?: Errors.Unknown.error()
+    }
+
+    override fun modifyWorklog(user: User, worklogId: Int, body: WorklogUpdateBody): ServiceResult<Task> {
+        if (tasksRepository.getWorklogById(worklogId) == null) {
+            return Errors.NotFound("worklog").error()
+        }
+        if (!tasksRepository.isUserWorklog(user.id, worklogId)) {
+            return Errors.NoAccess("worklog").error()
+        }
+        return tasksRepository.modifyWorklog(worklogId, body)?.success() ?: Errors.Unknown.error()
+    }
+
+    override fun deleteWorklog(user: User, worklogId: Int): ServiceResult<Unit> {
+        if (tasksRepository.getWorklogById(worklogId) == null) {
+            return Errors.NotFound("worklog").error()
+        }
+        if (!tasksRepository.isUserWorklog(user.id, worklogId)) {
+            return Errors.NoAccess("worklog").error()
+        }
+        return if (tasksRepository.deleteWorklog(worklogId)) Unit.success() else Errors.Unknown.error()
     }
 }
