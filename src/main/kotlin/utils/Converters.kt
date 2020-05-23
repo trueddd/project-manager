@@ -10,7 +10,7 @@ fun ResultRow.toProject(): Project {
     return Project(
         this[Projects.id].toInt(),
         this[Projects.name].toString(),
-        this[Projects.createdAt].toLong()
+        this[Projects.createdAt]
     )
 }
 
@@ -41,7 +41,7 @@ fun ResultRow.toTask(executors: List<User>?, worklogs: List<Worklog>?): Task {
         this[Tasks.id].toInt(),
         this[Tasks.name].toString(),
         this[Tasks.description]?.toString(),
-        this[Tasks.createdAt].toLong(),
+        this[Tasks.createdAt],
         TaskState(this[TaskStates.id].toInt(), this[TaskStates.name].toString()),
         this.toSprint(),
         this.toUser(),
@@ -54,8 +54,8 @@ fun ResultRow.toWorklog(): Worklog {
     return Worklog(
         this[WorkLogs.id].toInt(),
         this.toUser(),
-        this[WorkLogs.startedAt].toLong(),
-        this[WorkLogs.duration].toLong(),
+        this[WorkLogs.startedAt],
+        this[WorkLogs.finishedAt],
         this[WorkLogs.comment]?.toString()
     )
 }

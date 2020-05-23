@@ -8,6 +8,7 @@ import repository.BaseRepository
 import utils.toTask
 import utils.toUser
 import utils.toWorklog
+import java.time.LocalDateTime
 
 class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksRepository {
 
@@ -68,7 +69,7 @@ class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksR
             it[name] = body.name
             it[description] = body.description
             it[sprintId] = body.sprintId
-            it[createdAt] = System.currentTimeMillis()
+            it[createdAt] = LocalDateTime.now()
             it[creatorId] = userId
             it[stateId] = 1
         }.resultedValues?.firstOrNull()?.let {
@@ -144,7 +145,7 @@ class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksR
             it[WorkLogs.taskId] = taskId
             it[comment] = createBody.comment
             it[startedAt] = createBody.workStartedAt
-            it[duration] = createBody.workDuration
+            it[finishedAt] = createBody.workFinishedAt
         }.resultedValues?.firstOrNull()?.let {
             it[WorkLogs.id].toInt()
         } ?: return@query null
@@ -155,7 +156,7 @@ class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksR
         val updated = WorkLogs.update({ WorkLogs.id eq worklogId }) {
             updateBody.comment?.let { newValue -> it[comment] = newValue }
             updateBody.workStartedAt?.let { newValue -> it[startedAt] = newValue }
-            updateBody.workDuration?.let { newValue -> it[duration] = newValue }
+            updateBody.workFinishedAt?.let { newValue -> it[finishedAt] = newValue }
         }
         if (updated < 1) {
             rollback()

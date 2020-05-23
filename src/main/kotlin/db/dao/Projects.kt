@@ -1,11 +1,13 @@
 package db.dao
 
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.`java-time`.datetime
+import java.time.LocalDateTime
 
 object Projects : Table() {
     val id = integer("id").autoIncrement()
     val name = varchar("name", 64)
-    val createdAt = long("created_at")
+    val createdAt = datetime("created_at").default(LocalDateTime.now())
 
     override val tableName = "projects"
 

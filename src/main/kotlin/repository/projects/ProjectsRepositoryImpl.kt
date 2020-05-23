@@ -9,6 +9,7 @@ import repository.BaseRepository
 import utils.isOwner
 import utils.toProject
 import utils.toUser
+import java.time.LocalDateTime
 
 class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), ProjectsRepository {
 
@@ -23,7 +24,7 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
     override fun createProject(user: User, name: String): Project? = query {
         val project = Projects.insert {
             it[Projects.name] = name
-            it[createdAt] = System.currentTimeMillis()
+            it[createdAt] = LocalDateTime.now()
         }.resultedValues?.firstOrNull()?.toProject()
         if (project != null) {
             ProjectsUsers.insert {

@@ -25,7 +25,7 @@ dependencies {
     val logbackVersion = "1.2.3"
     val koinVersion = "2.1.5"
     val postgresDriverVersion = "42.2.2"
-    val exposedVersion = "0.23.1"
+    val exposedVersion = "0.24.1"
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -43,6 +43,7 @@ dependencies {
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-java-time", exposedVersion)
 }
 
 sourceSets {
