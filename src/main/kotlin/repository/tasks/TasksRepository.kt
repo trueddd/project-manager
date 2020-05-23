@@ -30,4 +30,14 @@ interface TasksRepository {
     fun isUserWorklog(userId: Int, worklogId: Int): Boolean
 
     fun deleteWorklog(worklogId: Int): Boolean
+
+    fun getUserWorklogStatsByTask(userId: Int, taskId: Int): List<WorklogStatsItem>
+
+    fun getUserWorklogStatsBySprint(userId: Int, sprintId: Int): List<WorklogStatsItem>
+
+    fun getUserWorklogStatsByEpic(userId: Int, epicId: Int): List<WorklogStatsItem>
+
+    fun getUserWorklogStatsByProject(userId: Int, projectId: Int): List<WorklogStatsItem>
+
+    fun getUserWorklogStats(userId: Int): List<WorklogStatsItem>
 }

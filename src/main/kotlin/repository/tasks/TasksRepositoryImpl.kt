@@ -8,6 +8,7 @@ import repository.BaseRepository
 import utils.toTask
 import utils.toUser
 import utils.toWorklog
+import utils.toWorklogStatsItem
 import java.time.LocalDateTime
 
 class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksRepository {
@@ -169,6 +170,42 @@ class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksR
 
     override fun deleteWorklog(worklogId: Int): Boolean = query {
         return@query WorkLogs.deleteWhere { WorkLogs.id eq worklogId } > 0
+    }
+
+    override fun getUserWorklogStatsByTask(userId: Int, taskId: Int): List<WorklogStatsItem> = query {
+        return@query (WorkLogs leftJoin Tasks leftJoin Sprints leftJoin Epics leftJoin Projects)
+            .select { (WorkLogs.userId eq userId) and (WorkLogs.taskId eq taskId) }
+            .map { it.toWorklogStatsItem() }
+    }
+
+    override fun getUserWorklogStatsBySprint(userId: Int, sprintId: Int): List<WorklogStatsItem> = query {
+        val tasks = Tasks.select { Tasks.sprintId eq sprintId }.map { it[Tasks.id].toInt() }
+        return@query (WorkLogs leftJoin Tasks leftJoin Sprints leftJoin Epics leftJoin Projects)
+            .select { (WorkLogs.userId eq userId) and (WorkLogs.taskId inList tasks) }
+            .map { it.toWorklogStatsItem() }
+    }
+
+    override fun getUserWorklogStatsByEpic(userId: Int, epicId: Int): List<WorklogStatsItem> = query {
+        val sprints = Sprints.select { Sprints.epicId eq epicId }.map { it[Sprints.id].toInt() }
+        val tasks = Tasks.select { Tasks.sprintId inList sprints }.map { it[Tasks.id].toInt() }
+        return@query (WorkLogs leftJoin Tasks leftJoin Sprints leftJoin Epics leftJoin Projects)
+            .select { (WorkLogs.userId eq userId) and (WorkLogs.taskId inList tasks) }
+            .map { it.toWorklogStatsItem() }
+    }
+
+    override fun getUserWorklogStatsByProject(userId: Int, projectId: Int): List<WorklogStatsItem> = query {
+        val epics = Epics.select { Epics.projectId eq projectId }.map { it[Epics.id].toInt() }
+        val sprints = Sprints.select { Sprints.epicId inList epics }.map { it[Sprints.id].toInt() }
+        val tasks = Tasks.select { Tasks.sprintId inList sprints }.map { it[Tasks.id].toInt() }
+        return@query (WorkLogs leftJoin Tasks leftJoin Sprints leftJoin Epics leftJoin Projects)
+            .select { (WorkLogs.userId eq userId) and (WorkLogs.taskId inList tasks) }
+            .map { it.toWorklogStatsItem() }
+    }
+
+    override fun getUserWorklogStats(userId: Int): List<WorklogStatsItem> = query {
+        return@query (WorkLogs leftJoin Tasks leftJoin Sprints leftJoin Epics leftJoin Projects)
+            .select { WorkLogs.userId eq userId }
+            .map { it.toWorklogStatsItem() }
     }
 
     private fun getTasksJoin() = Tasks leftJoin Sprints leftJoin Users leftJoin TaskStates

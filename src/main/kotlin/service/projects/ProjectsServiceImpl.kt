@@ -2,7 +2,9 @@ package service.projects
 
 import db.data.User
 import db.data.projects.Project
+import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
+import db.data.projects.ProjectUpdateBody
 import repository.projects.ProjectsRepository
 import repository.users.UsersRepository
 import utils.Errors
@@ -19,19 +21,19 @@ class ProjectsServiceImpl(
         return projectsRepository.getProjects().success()
     }
 
-    override fun createProject(user: User, projectName: String): ServiceResult<Project> {
-        val project = projectsRepository.createProject(user, projectName)
+    override fun createProject(user: User, createBody: ProjectCreateBody): ServiceResult<Project> {
+        val project = projectsRepository.createProject(user, createBody)
         return project?.success() ?: Errors.Unknown.error()
     }
 
-    override fun modifyProject(user: User, projectId: Int, newName: String): ServiceResult<Project> {
+    override fun modifyProject(user: User, projectId: Int, updateBody: ProjectUpdateBody): ServiceResult<Project> {
         if (projectsRepository.getProjectById(projectId) == null) {
             return Errors.NotFound("project").error()
         }
         if (projectsRepository.getUserRightsOnProject(user, projectId) < 0) {
             return Errors.NoAccess("project").error()
         }
-        val project = projectsRepository.modifyProject(projectId, newName)
+        val project = projectsRepository.modifyProject(projectId, updateBody)
         return project?.success() ?: Errors.Unknown.error()
     }
 

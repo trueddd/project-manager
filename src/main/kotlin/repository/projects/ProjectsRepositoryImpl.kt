@@ -3,7 +3,9 @@ package repository.projects
 import db.dao.*
 import db.data.User
 import db.data.projects.Project
+import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
+import db.data.projects.ProjectUpdateBody
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
 import utils.isOwner
@@ -21,10 +23,11 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
         return@query Projects.select { Projects.id eq id }.singleOrNull()?.toProject()
     }
 
-    override fun createProject(user: User, name: String): Project? = query {
+    override fun createProject(user: User, createBody: ProjectCreateBody): Project? = query {
         val project = Projects.insert {
-            it[Projects.name] = name
+            it[name] = createBody.name
             it[createdAt] = LocalDateTime.now()
+            it[description] = createBody.description
         }.resultedValues?.firstOrNull()?.toProject()
         if (project != null) {
             ProjectsUsers.insert {
@@ -36,9 +39,10 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
         return@query project
     }
 
-    override fun modifyProject(projectId: Int, name: String): Project? = query {
+    override fun modifyProject(projectId: Int, updateBody: ProjectUpdateBody): Project? = query {
         val modified = Projects.update({ Projects.id eq projectId }) {
-            it[Projects.name] = name
+            updateBody.name?.let { newValue -> it[name] = newValue }
+            updateBody.description?.let { newValue -> it[description] = newValue }
         }
         if (modified < 1) {
             rollback()

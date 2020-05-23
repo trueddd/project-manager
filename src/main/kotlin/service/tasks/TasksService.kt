@@ -23,4 +23,14 @@ interface TasksService {
     fun modifyWorklog(user: User, worklogId: Int, body: WorklogUpdateBody): ServiceResult<Task>
 
     fun deleteWorklog(user: User, worklogId: Int): ServiceResult<Unit>
+
+    fun getUserWorklogsByTask(user: User, taskId: Int): ServiceResult<WorklogStats>
+
+    fun getUserWorklogsBySprint(user: User, sprintId: Int): ServiceResult<WorklogStats>
+
+    fun getUserWorklogsByEpic(user: User, epicId: Int): ServiceResult<WorklogStats>
+
+    fun getUserWorklogsByProject(user: User, projectId: Int): ServiceResult<WorklogStats>
+
+    fun getUserWorklogs(user: User): ServiceResult<WorklogStats>
 }
