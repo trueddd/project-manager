@@ -1,4 +1,5 @@
 import auth.setupJwtAuth
+import com.google.gson.*
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -16,18 +17,29 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.InternalAPI
 import io.ktor.util.KtorExperimentalAPI
+import io.ktor.util.toLocalDateTime
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.slf4j.event.Level
 import routes.*
 import utils.AppEnvironment
+import java.lang.reflect.Type
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
+@InternalAPI
 @KtorExperimentalAPI
 fun main(args: Array<String>) {
     embeddedServer(Netty, port = AppEnvironment.getPort(), module = Application::module).start(wait = true)
 }
 
+@InternalAPI
 @KtorExperimentalAPI
 fun Application.module() {
 
@@ -56,6 +68,19 @@ fun Application.module() {
 
     install(ContentNegotiation) {
         gson {
+            val datePattern = "yyyy-MM-dd'T'HH:mm:ssZ"
+            val dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern)
+            registerTypeAdapter(LocalDateTime::class.java, object : JsonDeserializer<LocalDateTime>, JsonSerializer<LocalDateTime> {
+                override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): LocalDateTime? {
+                    return json?.asJsonPrimitive?.asString?.let {
+                        SimpleDateFormat(datePattern, Locale.getDefault()).parse(it).toLocalDateTime()
+                    }
+                }
+
+                override fun serialize(src: LocalDateTime?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
+                    return ZonedDateTime.of(src, ZoneId.systemDefault())?.format(dateTimeFormatter)?.let { JsonPrimitive(it) }
+                }
+            })
         }
     }
 
