@@ -32,6 +32,7 @@ suspend fun <T> PipelineContext<*, ApplicationCall>.respondError(error: ServiceR
         is Errors.NoAccess, is Errors.WrongPass -> HttpStatusCode.Forbidden
         is Errors.NotFound -> HttpStatusCode.NotFound
         is Errors.Conflict, is Errors.Users.NameAlreadyUsed -> HttpStatusCode.Conflict
+        is Errors.Validation -> HttpStatusCode.BadRequest
         else -> HttpStatusCode.InternalServerError
     }
     call.respond(statusCode, error.errorMessage())

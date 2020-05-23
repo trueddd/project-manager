@@ -10,7 +10,8 @@ fun ResultRow.toProject(): Project {
     return Project(
         this[Projects.id].toInt(),
         this[Projects.name].toString(),
-        this[Projects.createdAt]
+        this[Projects.createdAt],
+        this[Projects.description]?.toString()
     )
 }
 
@@ -57,5 +58,26 @@ fun ResultRow.toWorklog(): Worklog {
         this[WorkLogs.startedAt],
         this[WorkLogs.finishedAt],
         this[WorkLogs.comment]?.toString()
+    )
+}
+
+fun ResultRow.toWorklogStatsItem(): WorklogStatsItem {
+    return WorklogStatsItem(
+        this[WorkLogs.id],
+        this[WorkLogs.comment]?.toString(),
+        this.toSimpleTask(),
+        this[WorkLogs.startedAt],
+        this[WorkLogs.finishedAt]
+    )
+}
+
+fun ResultRow.toSimpleTask(): SimpleTask {
+    return SimpleTask(
+        this[Tasks.id].toInt(),
+        this[Tasks.name].toString(),
+        this[Tasks.description]?.toString(),
+        this[Tasks.createdAt],
+        this.toSprint(),
+        this.toProject()
     )
 }

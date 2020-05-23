@@ -145,5 +145,27 @@ fun Routing.taskRoutes() {
                 is ServiceResult.Error -> respondError(request)
             }
         }
+
+        get(Endpoints.Tasks.route(Endpoints.Worklogs)) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+            val projectId = call.parameters["project_id"]?.toIntOrNull()
+            val epicId = call.parameters["epic_id"]?.toIntOrNull()
+            val sprintId = call.parameters["sprint_id"]?.toIntOrNull()
+            val taskId = call.parameters["task_id"]?.toIntOrNull()
+            val request = when {
+                taskId != null -> tasksService.getUserWorklogsByTask(user, taskId)
+                sprintId != null -> tasksService.getUserWorklogsBySprint(user, sprintId)
+                epicId != null -> tasksService.getUserWorklogsByEpic(user, epicId)
+                projectId != null -> tasksService.getUserWorklogsByProject(user, projectId)
+                else -> tasksService.getUserWorklogs(user)
+            }
+            when (request) {
+                is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
     }
 }

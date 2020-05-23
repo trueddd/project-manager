@@ -1,6 +1,7 @@
 package routes
 
-import db.data.projects.ProjectBody
+import db.data.projects.ProjectCreateBody
+import db.data.projects.ProjectUpdateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -32,11 +33,11 @@ fun Routing.projectsRoutes() {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            val projectRequest = call.receiveSafe<ProjectBody>() ?: run {
+            val projectRequest = call.receiveSafe<ProjectCreateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            when (val request = projectsService.createProject(user, projectRequest.name)) {
+            when (val request = projectsService.createProject(user, projectRequest)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
@@ -51,11 +52,11 @@ fun Routing.projectsRoutes() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            val projectRequest = call.receiveSafe<ProjectBody>() ?: run {
+            val projectRequest = call.receiveSafe<ProjectUpdateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val request = projectsService.modifyProject(user, projectId, projectRequest.name)) {
+            when (val request = projectsService.modifyProject(user, projectId, projectRequest)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> respondError(request)
             }

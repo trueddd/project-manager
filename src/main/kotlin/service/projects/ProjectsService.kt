@@ -2,16 +2,18 @@ package service.projects
 
 import db.data.User
 import db.data.projects.Project
+import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
+import db.data.projects.ProjectUpdateBody
 import utils.ServiceResult
 
 interface ProjectsService {
 
     fun getTeamProjects(user: User): ServiceResult<List<Project>>
 
-    fun createProject(user: User, projectName: String): ServiceResult<Project>
+    fun createProject(user: User, createBody: ProjectCreateBody): ServiceResult<Project>
 
-    fun modifyProject(user: User, projectId: Int, newName: String): ServiceResult<Project>
+    fun modifyProject(user: User, projectId: Int, updateBody: ProjectUpdateBody): ServiceResult<Project>
 
     fun deleteProject(user: User, projectId: Int): ServiceResult<Unit>
 
