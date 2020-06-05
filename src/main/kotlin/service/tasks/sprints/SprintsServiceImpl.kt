@@ -2,6 +2,8 @@ package service.tasks.sprints
 
 import db.data.User
 import db.data.tasks.Sprint
+import db.data.tasks.SprintCreateBody
+import db.data.tasks.SprintUpdateBody
 import repository.projects.ProjectsRepository
 import repository.tasks.epics.EpicsRepository
 import repository.tasks.sprints.SprintsRepository
@@ -31,7 +33,7 @@ class SprintsServiceImpl(
         return sprintsRepository.getSprints(projectId, epicId).success()
     }
 
-    override fun createSprint(user: User, epicId: Int, sprintName: String): ServiceResult<Sprint> {
+    override fun createSprint(user: User, epicId: Int, body: SprintCreateBody): ServiceResult<Sprint> {
         if (epicsRepository.getEpicById(epicId) == null) {
             return Errors.NotFound("epic").error()
         }
@@ -39,17 +41,17 @@ class SprintsServiceImpl(
         if (projectsRepository.getUserRightsOnProject(user, project.id) < 0) {
             return Errors.NoAccess("epic").error()
         }
-        return sprintsRepository.createSprint(epicId, sprintName)?.success() ?: Errors.Unknown.error()
+        return sprintsRepository.createSprint(epicId, body)?.success() ?: Errors.Unknown.error()
     }
 
-    override fun renameSprint(user: User, sprintId: Int, newName: String): ServiceResult<Sprint> {
+    override fun modifySprint(user: User, sprintId: Int, body: SprintUpdateBody): ServiceResult<Sprint> {
         if (sprintsRepository.getSprintById(sprintId) == null) {
             return Errors.NotFound("sprint").error()
         }
         if (sprintsRepository.getUserRightsOnSprint(user, sprintId) < 0) {
             return Errors.NoAccess("sprint").error()
         }
-        return sprintsRepository.renameSprint(sprintId, newName)?.success() ?: Errors.Unknown.error()
+        return sprintsRepository.modifySprint(sprintId, body)?.success() ?: Errors.Unknown.error()
     }
 
     override fun deleteSprint(user: User, sprintId: Int): ServiceResult<Unit> {

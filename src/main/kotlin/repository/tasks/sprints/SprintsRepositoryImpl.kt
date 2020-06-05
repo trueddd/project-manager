@@ -3,6 +3,8 @@ package repository.tasks.sprints
 import db.dao.*
 import db.data.User
 import db.data.tasks.Sprint
+import db.data.tasks.SprintCreateBody
+import db.data.tasks.SprintUpdateBody
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
 import utils.toSprint
@@ -18,16 +20,20 @@ class SprintsRepositoryImpl(database: Database) : BaseRepository(database), Spri
         return@query Sprints.select { Sprints.id eq sprintId }.singleOrNull()?.toSprint()
     }
 
-    override fun createSprint(epicId: Int, name: String): Sprint? = query {
+    override fun createSprint(epicId: Int, body: SprintCreateBody): Sprint? = query {
         return@query Sprints.insert {
-            it[Sprints.name] = name
+            it[name] = body.name
             it[Sprints.epicId] = epicId
+            it[start] = body.start
+            it[finish] = body.finish
         }.resultedValues?.firstOrNull()?.toSprint()
     }
 
-    override fun renameSprint(sprintId: Int, newName: String): Sprint? = query {
+    override fun modifySprint(sprintId: Int, body: SprintUpdateBody): Sprint? = query {
         val updated = Sprints.update({ Sprints.id eq sprintId }) {
-            it[name] = newName
+            body.name?.let { newValue -> it[name] = newValue }
+            body.start?.let { newValue -> it[start] = newValue }
+            body.finish?.let { newValue -> it[finish] = newValue }
         }
         if (updated <= 0) {
             return@query null

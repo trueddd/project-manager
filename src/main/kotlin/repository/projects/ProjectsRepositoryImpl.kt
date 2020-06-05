@@ -6,9 +6,12 @@ import db.data.projects.Project
 import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
 import db.data.projects.ProjectUpdateBody
+import db.data.tasks.TaskWithLogs
+import db.data.tasks.Worklog
 import org.jetbrains.exposed.sql.*
 import repository.BaseRepository
 import utils.isOwner
+import utils.toExtendedWorklog
 import utils.toProject
 import utils.toUser
 import java.time.LocalDateTime
@@ -20,7 +23,7 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
     }
 
     override fun getProjectById(id: Int): Project? = query {
-        return@query Projects.select { Projects.id eq id }.singleOrNull()?.toProject()
+        Projects.select { Projects.id eq id }.singleOrNull()?.toProject()
     }
 
     override fun createProject(user: User, createBody: ProjectCreateBody): Project? = query {
@@ -48,7 +51,7 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
             rollback()
             return@query null
         }
-        return@query Projects.select { Projects.id eq projectId }.singleOrNull()?.toProject()
+        Projects.select { Projects.id eq projectId }.singleOrNull()?.toProject()
     }
 
     override fun deleteProject(projectId: Int): Boolean = query {
@@ -56,7 +59,7 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
     }
 
     override fun getUserRightsOnProject(user: User, projectId: Int): Int = query {
-        return@query ProjectsUsers
+        ProjectsUsers
             .select { (ProjectsUsers.projectId eq projectId) and (ProjectsUsers.userId eq user.id) }
             .singleOrNull()?.let { it[ProjectsUsers.rights].toInt() } ?: -1
     }
@@ -66,7 +69,7 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
             .singleOrNull()?.let {
                 it[Epics.projectId].toInt()
             } ?: return@query -1
-        return@query getUserRightsOnProject(user, projectId)
+        getUserRightsOnProject(user, projectId)
     }
 
     override fun getUserRightsOnSprint(user: User, sprintId: Int): Int = query {
@@ -74,25 +77,17 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
             .singleOrNull()?.let {
                 it[Sprints.epicId].toInt()
             } ?: return@query -1
-        return@query getUserRightsOnEpic(user, epicId)
+        getUserRightsOnEpic(user, epicId)
     }
 
-//    override fun getUserRightsOnTask(user: User, taskId: Int): Int = query {
-//        val sprintId = Tasks.select { Tasks.id eq taskId }
-//            .singleOrNull()?.let {
-//                it[Tasks.sprintId].toInt()
-//            } ?: return@query -1
-//        return@query getUserRightsOnSprint(user, sprintId)
-//    }
-
     override fun getProjectMembers(projectId: Int): List<ProjectMember> = query {
-        return@query (ProjectsUsers leftJoin Users)
+        (ProjectsUsers leftJoin Users)
             .select { ProjectsUsers.projectId eq projectId }
             .map { ProjectMember(it.toUser(), it.isOwner()) }
     }
 
     override fun addProjectMember(projectId: Int, userId: Int): Boolean = query {
-        return@query ProjectsUsers.insert {
+        ProjectsUsers.insert {
             it[ProjectsUsers.projectId] = projectId
             it[ProjectsUsers.userId] = userId
             it[rights] = 0
@@ -100,8 +95,18 @@ class ProjectsRepositoryImpl(database: Database) : BaseRepository(database), Pro
     }
 
     override fun removeProjectMember(projectId: Int, userId: Int): Boolean = query {
-        return@query ProjectsUsers.deleteWhere {
+        ProjectsUsers.deleteWhere {
             (ProjectsUsers.projectId eq projectId) and (ProjectsUsers.userId eq userId)
         } > 0
+    }
+
+    override fun getProjectWorklogs(projectId: Int): List<TaskWithLogs>? = query {
+        (WorkLogs leftJoin Users)
+            .join((Tasks leftJoin Sprints leftJoin Epics leftJoin Projects), JoinType.LEFT, WorkLogs.taskId, Tasks.id)
+            .select { Projects.id eq projectId }
+            .map { it.toExtendedWorklog() }
+            .groupBy { it.task }
+            .mapValues { v -> v.value.map { Worklog(it.id, it.reporter, it.workStartedAt, it.workFinishedAt, it.comment) } }
+            .map { TaskWithLogs(it.key, it.value) }
     }
 }

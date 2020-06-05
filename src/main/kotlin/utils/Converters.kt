@@ -20,7 +20,12 @@ fun ResultRow.toEpic(): Epic {
 }
 
 fun ResultRow.toSprint(): Sprint {
-    return Sprint(this[Sprints.id], this[Sprints.name])
+    return Sprint(
+        this[Sprints.id].toInt(),
+        this[Sprints.name].toString(),
+        this[Sprints.start],
+        this[Sprints.finish]
+    )
 }
 
 fun ResultRow.toUser(): User {
@@ -79,5 +84,16 @@ fun ResultRow.toSimpleTask(): SimpleTask {
         this[Tasks.createdAt],
         this.toSprint(),
         this.toProject()
+    )
+}
+
+fun ResultRow.toExtendedWorklog(): ExtendedWorklog {
+    return ExtendedWorklog(
+        this[WorkLogs.id].toInt(),
+        this.toUser(),
+        this[WorkLogs.startedAt],
+        this[WorkLogs.finishedAt],
+        this[WorkLogs.comment]?.toString(),
+        this.toSimpleTask()
     )
 }

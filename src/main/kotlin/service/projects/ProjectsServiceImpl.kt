@@ -5,6 +5,7 @@ import db.data.projects.Project
 import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
 import db.data.projects.ProjectUpdateBody
+import db.data.tasks.TaskWithLogs
 import repository.projects.ProjectsRepository
 import repository.users.UsersRepository
 import utils.Errors
@@ -88,5 +89,15 @@ class ProjectsServiceImpl(
             }
         }
         return if (deleted) Unit.success() else Errors.Unknown.error()
+    }
+
+    override fun getProjectWorklogs(user: User, projectId: Int): ServiceResult<List<TaskWithLogs>> {
+        if (projectsRepository.getProjectById(projectId) == null) {
+            return Errors.NotFound("project").error()
+        }
+        if (projectsRepository.getUserRightsOnProject(user, projectId) < 0) {
+            return Errors.NoAccess("project").error()
+        }
+        return projectsRepository.getProjectWorklogs(projectId)?.success() ?: Errors.Unknown.error()
     }
 }

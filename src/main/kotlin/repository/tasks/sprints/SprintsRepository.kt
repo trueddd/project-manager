@@ -2,6 +2,8 @@ package repository.tasks.sprints
 
 import db.data.User
 import db.data.tasks.Sprint
+import db.data.tasks.SprintCreateBody
+import db.data.tasks.SprintUpdateBody
 
 interface SprintsRepository {
 
@@ -9,9 +11,9 @@ interface SprintsRepository {
 
     fun getSprintById(sprintId: Int): Sprint?
 
-    fun createSprint(epicId: Int, name: String): Sprint?
+    fun createSprint(epicId: Int, body: SprintCreateBody): Sprint?
 
-    fun renameSprint(sprintId: Int, newName: String): Sprint?
+    fun modifySprint(sprintId: Int, body: SprintUpdateBody): Sprint?
 
     fun deleteSprint(sprintId: Int): Boolean
 
