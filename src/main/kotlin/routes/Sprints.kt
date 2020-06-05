@@ -1,7 +1,7 @@
 package routes
 
-import db.data.tasks.NamedUpdateBody
 import db.data.tasks.SprintCreateBody
+import db.data.tasks.SprintUpdateBody
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -46,7 +46,7 @@ fun Routing.sprintsRoutes() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            when (val request = sprintsService.createSprint(user, epicId, body.name)) {
+            when (val request = sprintsService.createSprint(user, epicId, body)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.Created, request.data)
                 is ServiceResult.Error -> respondError(request)
             }
@@ -61,11 +61,11 @@ fun Routing.sprintsRoutes() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            val body = call.receiveSafe<NamedUpdateBody>() ?: run {
+            val body = call.receiveSafe<SprintUpdateBody>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@put
             }
-            when (val request = sprintsService.renameSprint(user, sprintId, body.name)) {
+            when (val request = sprintsService.modifySprint(user, sprintId, body)) {
                 is ServiceResult.Success -> call.respond(HttpStatusCode.OK, request.data)
                 is ServiceResult.Error -> respondError(request)
             }

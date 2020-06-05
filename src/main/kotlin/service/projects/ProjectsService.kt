@@ -5,6 +5,7 @@ import db.data.projects.Project
 import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
 import db.data.projects.ProjectUpdateBody
+import db.data.tasks.TaskWithLogs
 import utils.ServiceResult
 
 interface ProjectsService {
@@ -22,4 +23,6 @@ interface ProjectsService {
     fun addProjectMember(user: User, projectId: Int, userId: Int): ServiceResult<Unit>
 
     fun removeProjectMember(user: User, projectId: Int, userId: Int): ServiceResult<Unit>
+
+    fun getProjectWorklogs(user: User, projectId: Int): ServiceResult<List<TaskWithLogs>>
 }

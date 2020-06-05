@@ -101,19 +101,26 @@ class TasksRepositoryImpl(database: Database) : BaseRepository(database), TasksR
                 return@query null
             }
         }
-        val addExecutors = updateBody.addExecutors ?: emptyList()
-        val removeExecutors = updateBody.removeExecutors ?: emptyList()
-        val add = addExecutors - removeExecutors
-        val remove = removeExecutors - addExecutors
-        add.forEach { executor ->
-            TaskExecutors.insert {
-                it[TaskExecutors.taskId] = taskId
-                it[executorId] = executor
+        updateBody.executors?.let { newExecutors ->
+            if (newExecutors.isEmpty()) {
+                TaskExecutors.deleteWhere { TaskExecutors.taskId eq taskId }
+            } else {
+                TaskExecutors.deleteWhere {
+                    (TaskExecutors.taskId eq taskId) and (TaskExecutors.executorId notInList newExecutors)
+                }
             }
-        }
-        if (remove.isNotEmpty()) {
-            TaskExecutors.deleteWhere {
-                (TaskExecutors.taskId eq taskId) and (TaskExecutors.executorId inList remove)
+            if (newExecutors.isEmpty()) {
+                return@let
+            }
+            val currentExecutors = TaskExecutors
+                .select { TaskExecutors.taskId eq taskId }
+                .map { it[TaskExecutors.executorId].toInt() }
+            val toAdd = newExecutors - currentExecutors
+            toAdd.forEach { executorId ->
+                TaskExecutors.insert {
+                    it[TaskExecutors.taskId] = taskId
+                    it[TaskExecutors.executorId] = executorId
+                }
             }
         }
         return@query getTaskById(taskId)

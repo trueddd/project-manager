@@ -129,5 +129,20 @@ fun Routing.projectsRoutes() {
                 is ServiceResult.Error -> respondError(request)
             }
         }
+
+        get(Endpoints.Projects.path("projectId").route(Endpoints.Worklogs)) {
+            val user = call.user ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+            val projectId = call.parameters["projectId"]?.toIntOrNull() ?: run {
+                call.respond(HttpStatusCode.BadRequest, "No project id provided")
+                return@get
+            }
+            when (val request = projectsService.getProjectWorklogs(user, projectId)) {
+                is ServiceResult.Success -> call.respond(request.data)
+                is ServiceResult.Error -> respondError(request)
+            }
+        }
     }
 }

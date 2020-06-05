@@ -5,6 +5,5 @@ data class TaskUpdateBody(
     val description: String?,
     val stateId: Int?,
     val sprintId: Int?,
-    val addExecutors: List<Int>?,
-    val removeExecutors: List<Int>?
+    val executors: List<Int>?
 )

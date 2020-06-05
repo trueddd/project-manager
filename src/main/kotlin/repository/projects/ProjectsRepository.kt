@@ -5,6 +5,7 @@ import db.data.projects.Project
 import db.data.projects.ProjectCreateBody
 import db.data.projects.ProjectMember
 import db.data.projects.ProjectUpdateBody
+import db.data.tasks.TaskWithLogs
 
 interface ProjectsRepository {
 
@@ -29,4 +30,6 @@ interface ProjectsRepository {
     fun addProjectMember(projectId: Int, userId: Int): Boolean
 
     fun removeProjectMember(projectId: Int, userId: Int): Boolean
+
+    fun getProjectWorklogs(projectId: Int): List<TaskWithLogs>?
 }
